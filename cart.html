@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="晨光早餐店購物車 - 查看您的訂單並完成結帳">
+  <meta name="keywords" content="購物車, 結帳, 早餐訂單">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌅</text></svg>">
+  <title>購物車 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/data.js"></script>
+  <style>
+    /* 購物車專屬樣式 */
+    
+    .cart-container {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: var(--spacing-xl);
+      align-items: start;
+    }
+    
+    /* 購物車項目列表 */
+    .cart-items-section {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .cart-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    .clear-cart-btn {
+      background: var(--accent-red);
+      color: var(--white);
+      border: none;
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .clear-cart-btn:hover {
+      background: #d94843;
+      transform: scale(1.05);
+    }
+    
+    .cart-item {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      background: var(--light-gray);
+      border-radius: var(--radius-sm);
+      transition: var(--transition-fast);
+    }
+    
+    .cart-item:hover {
+      background: var(--soft-peach);
+      transform: translateX(5px);
+    }
+    
+    .cart-item-image {
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+    }
+    
+    .cart-item-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .cart-item-name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.3rem;
+    }
+    
+    .cart-item-category {
+      display: inline-block;
+      background: var(--primary-yellow);
+      color: var(--white);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-full);
+      margin-bottom: 0.5rem;
+      width: fit-content;
+    }
+    
+    .cart-item-options {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      line-height: 1.5;
+    }
+    
+    .cart-item-option {
+      display: block;
+    }
+    
+    .cart-item-controls {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .cart-item-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+    }
+    
+    .cart-item-quantity {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--white);
+      padding: 0.3rem;
+      border-radius: var(--radius-full);
+      margin: var(--spacing-sm) 0;
+    }
+    
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: var(--primary-orange);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .qty-btn:hover {
+      background: var(--accent-red);
+      transform: scale(1.15);
+    }
+    
+    .qty-value {
+      min-width: 30px;
+      text-align: center;
+      font-weight: 700;
+    }
+    
+    .remove-item-btn {
+      background: transparent;
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .remove-item-btn:hover {
+      background: var(--accent-red);
+      color: var(--white);
+    }
+    
+    /* 訂單摘要 */
+    .order-summary {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 90px;
+    }
+    
+    .summary-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-sm);
+      font-size: 1rem;
+    }
+    
+    .summary-label {
+      color: var(--dark-gray);
+    }
+    
+    .summary-value {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    .summary-divider {
+      height: 1px;
+      background: var(--medium-gray);
+      margin: var(--spacing-md) 0;
+    }
+    
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+      margin-top: var(--spacing-md);
+      padding-top: var(--spacing-md);
+      border-top: 2px solid var(--primary-orange);
+    }
+    
+    .delivery-note {
+      background: var(--soft-peach);
+      padding: var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      margin: var(--spacing-md) 0;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      text-align: center;
+    }
+    
+    .checkout-btn {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      margin-top: var(--spacing-md);
+    }
+    
+    .checkout-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .checkout-btn:disabled {
+      background: var(--medium-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .continue-shopping-btn {
+      width: 100%;
+      padding: var(--spacing-sm);
+      background: var(--white);
+      color: var(--primary-orange);
+      border: 2px solid var(--primary-orange);
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      margin-top: var(--spacing-sm);
+    }
+    
+    .continue-shopping-btn:hover {
+      background: var(--primary-orange);
+      color: var(--white);
+    }
+    
+    /* 空購物車狀態 */
+    .empty-cart {
+      text-align: center;
+      padding: var(--spacing-xl) var(--spacing-lg);
+      background: var(--white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .empty-cart-icon {
+      font-size: 5rem;
+      margin-bottom: var(--spacing-md);
+      opacity: 0.5;
+    }
+    
+    .empty-cart-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .empty-cart-text {
+      color: var(--dark-gray);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    /* 成功訊息 */
+    .success-message {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-green);
+      color: var(--white);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 3000;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .success-message.show {
+      display: block;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+    
+    /* 響應式 */
+    @media (max-width: 968px) {
+      .cart-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .order-summary {
+        position: static;
+      }
+    }
+    
+    @media (max-width: 568px) {
+      .cart-item {
+        grid-template-columns: 1fr;
+      }
+      
+      .cart-item-image {
+        width: 100%;
+        height: 180px;
+      }
+      
+      .cart-item-controls {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 導覽列 -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">MORNING GLORY</div>
+        </div>
+      </a>
+      
+      <button class="navbar-toggle" id="navbarToggle" aria-label="開啟選單">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
+        <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
+        <li><a href="profile.html" class="navbar-link">👤 會員中心</a></li>
+        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+        <li>
+          <a href="cart.html" class="navbar-link cart-link active">
+            🛒 購物車
+            <span class="cart-badge" id="cartBadge">0</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 主要內容 -->
+  <main>
+    <h1 class="section-title">🛒 購物車</h1>
+    
+    <div id="cartContent">
+      <!-- 由 JavaScript 動態生成 -->
+    </div>
+  </main>
+
+  <!-- 成功訊息 -->
+  <div class="success-message" id="successMessage"></div>
+
+  <!-- 頁尾 -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>🌅 關於晨光</h3>
+        <p>
+          自1995年創立以來，晨光早餐店始終堅持使用新鮮食材，
+          為每一位顧客準備美味、健康的早餐。
+          讓每一天都從美好的早晨開始！
+        </p>
+        <div class="footer-social">
+          <a href="#" class="social-icon" aria-label="Facebook">📘</a>
+          <a href="#" class="social-icon" aria-label="Instagram">📷</a>
+          <a href="#" class="social-icon" aria-label="Line">💬</a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>📍 店家資訊</h3>
+        <div class="footer-info">
+          <span class="footer-info-icon">📞</span>
+          <span>(04) 2222-3333</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">📍</span>
+          <span>台中市西區美村路一段123號</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">⏰</span>
+          <span>週一至週日 06:00 - 14:00</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">🚚</span>
+          <span>外送服務：滿 $300 免運費</span>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>🔗 快速連結</h3>
+        <ul>
+          <li><a href="index.html" class="footer-link">首頁</a></li>
+          <li><a href="menu.html" class="footer-link">線上點餐</a></li>
+          <li><a href="profile.html" class="footer-link">會員中心</a></li>
+          <li><a href="login.html" class="footer-link">登入 / 註冊</a></li>
+          <li><a href="cart.html" class="footer-link">購物車</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h3>💡 顧客服務</h3>
+        <ul>
+          <li><a href="#" class="footer-link">常見問題</a></li>
+          <li><a href="#" class="footer-link">外送說明</a></li>
+          <li><a href="#" class="footer-link">付款方式</a></li>
+          <li><a href="#" class="footer-link">退換貨政策</a></li>
+          <li><a href="#" class="footer-link">聯絡我們</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-copyright">
+      <p>&copy; 2025 晨光早餐店 Morning Glory Breakfast Shop. All Rights Reserved.</p>
+      <p>網站設計 by 晨光數位團隊 | 營業登記：12345678</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="js/cart.js"></script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="晨光早餐店會員中心 - 查看個人資料與訂單記錄">
+  <meta name="keywords" content="會員中心, 訂單記錄, 個人資料">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌅</text></svg>">
+  <title>會員中心 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/data.js"></script>
+  <style>
+    /* 會員中心專屬樣式 */
+    
+    .profile-container {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: var(--spacing-xl);
+      align-items: start;
+    }
+    
+    /* 側邊欄 */
+    .profile-sidebar {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 90px;
+    }
+    
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      margin: 0 auto var(--spacing-md);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .profile-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      text-align: center;
+      margin-bottom: 0.3rem;
+    }
+    
+    .profile-email {
+      text-align: center;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .profile-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .stat-item {
+      background: var(--soft-peach);
+      padding: var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--dark-gray);
+      margin-top: 0.2rem;
+    }
+    
+    .profile-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .profile-menu-item {
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .profile-menu-link {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: var(--transition-fast);
+      font-weight: 600;
+    }
+    
+    .profile-menu-link:hover {
+      background: var(--soft-peach);
+      transform: translateX(5px);
+    }
+    
+    .profile-menu-link.active {
+      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+      color: var(--white);
+    }
+    
+    .logout-btn {
+      width: 100%;
+      padding: var(--spacing-sm);
+      background: var(--accent-red);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      margin-top: var(--spacing-md);
+    }
+    
+    .logout-btn:hover {
+      background: #d94843;
+      transform: scale(1.05);
+    }
+    
+    /* 主要內容區 */
+    .profile-main {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-md);
+      min-height: 600px;
+    }
+    
+    .profile-section {
+      display: none;
+    }
+    
+    .profile-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .section-header {
+      margin-bottom: var(--spacing-lg);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .section-title-main {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    /* 訂單列表 */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+    
+    .order-card {
+      border: 2px solid var(--light-gray);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      transition: var(--transition-fast);
+    }
+    
+    .order-card:hover {
+      border-color: var(--primary-orange);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .order-id {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    .order-date {
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    .order-status {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    
+    .order-status.processing {
+      background: var(--primary-yellow);
+      color: var(--white);
+    }
+    
+    .order-status.completed {
+      background: var(--accent-green);
+      color: var(--white);
+    }
+    
+    .order-status.cancelled {
+      background: var(--accent-red);
+      color: var(--white);
+    }
+    
+    .order-items {
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      color: var(--dark-gray);
+      font-size: 0.95rem;
+    }
+    
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--spacing-sm);
+      border-top: 1px solid var(--light-gray);
+    }
+    
+    .order-total {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+    }
+    
+    /* 個人資料表單 */
+    .profile-form {
+      max-width: 600px;
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-sm);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: var(--transition-fast);
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+    
+    .form-input:disabled {
+      background: var(--light-gray);
+      cursor: not-allowed;
+    }
+    
+    .save-btn {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    /* 空狀態 */
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl);
+      color: var(--dark-gray);
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-md);
+      opacity: 0.5;
+    }
+    
+    /* 響應式 */
+    @media (max-width: 968px) {
+      .profile-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .profile-sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 導覽列 -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">MORNING GLORY</div>
+        </div>
+      </a>
+      
+      <button class="navbar-toggle" id="navbarToggle" aria-label="開啟選單">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
+        <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
+        <li><a href="profile.html" class="navbar-link active">👤 會員中心</a></li>
+        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+        <li>
+          <a href="cart.html" class="navbar-link cart-link">
+            🛒 購物車
+            <span class="cart-badge" id="cartBadge">0</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 主要內容 -->
+  <main>
+    <div id="profileContent">
+      <!-- 由 JavaScript 動態生成 -->
+    </div>
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>🌅 關於晨光</h3>
+        <p>
+          自1995年創立以來，晨光早餐店始終堅持使用新鮮食材，
+          為每一位顧客準備美味、健康的早餐。
+          讓每一天都從美好的早晨開始！
+        </p>
+        <div class="footer-social">
+          <a href="#" class="social-icon" aria-label="Facebook">📘</a>
+          <a href="#" class="social-icon" aria-label="Instagram">📷</a>
+          <a href="#" class="social-icon" aria-label="Line">💬</a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>📍 店家資訊</h3>
+        <div class="footer-info">
+          <span class="footer-info-icon">📞</span>
+          <span>(04) 2222-3333</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">📍</span>
+          <span>台中市西區美村路一段123號</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">⏰</span>
+          <span>週一至週日 06:00 - 14:00</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">🚚</span>
+          <span>外送服務：滿 $300 免運費</span>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>🔗 快速連結</h3>
+        <ul>
+          <li><a href="index.html" class="footer-link">首頁</a></li>
+          <li><a href="menu.html" class="footer-link">線上點餐</a></li>
+          <li><a href="profile.html" class="footer-link">會員中心</a></li>
+          <li><a href="login.html" class="footer-link">登入 / 註冊</a></li>
+          <li><a href="cart.html" class="footer-link">購物車</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h3>💡 顧客服務</h3>
+        <ul>
+          <li><a href="#" class="footer-link">常見問題</a></li>
+          <li><a href="#" class="footer-link">外送說明</a></li>
+          <li><a href="#" class="footer-link">付款方式</a></li>
+          <li><a href="#" class="footer-link">退換貨政策</a></li>
+          <li><a href="#" class="footer-link">聯絡我們</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-copyright">
+      <p>&copy; 2025 晨光早餐店 Morning Glory Breakfast Shop. All Rights Reserved.</p>
+      <p>網站設計 by 晨光數位團隊 | 營業登記：12345678</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="js/profile.js"></script>
+</body>
+</html>

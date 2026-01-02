@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="晨光早餐店會員登入/註冊">
+  <meta name="keywords" content="會員登入, 註冊, 早餐店會員">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌅</text></svg>">
+  <title>會員登入 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/data.js"></script>
+  <style>
+    /* 登入頁面專屬樣式 */
+    
+    .auth-container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-xl);
+      background: var(--white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    
+    /* 左側 - 歡迎區域 */
+    .auth-welcome {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-yellow) 100%);
+      padding: var(--spacing-xl);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .welcome-icon {
+      font-size: 5rem;
+      margin-bottom: var(--spacing-lg);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .welcome-title {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .welcome-text {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      opacity: 0.95;
+    }
+    
+    .welcome-features {
+      margin-top: var(--spacing-lg);
+      text-align: left;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+      font-size: 1rem;
+    }
+    
+    /* 右側 - 表單區域 */
+    .auth-form-container {
+      padding: var(--spacing-xl);
+    }
+    
+    .form-tabs {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: var(--spacing-sm);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--dark-gray);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .tab-btn:hover {
+      color: var(--primary-orange);
+    }
+    
+    .tab-btn.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+    
+    .auth-form {
+      display: none;
+    }
+    
+    .auth-form.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-sm);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: var(--transition-fast);
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+    
+    .form-input.error {
+      border-color: var(--accent-red);
+    }
+    
+    .error-message {
+      color: var(--accent-red);
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+    
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .form-checkbox input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .form-checkbox label {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      cursor: pointer;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .submit-btn:disabled {
+      background: var(--medium-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .form-footer {
+      text-align: center;
+      margin-top: var(--spacing-md);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    .form-footer a {
+      color: var(--primary-orange);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 響應式 */
+    @media (max-width: 768px) {
+      .auth-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .auth-welcome {
+        padding: var(--spacing-lg);
+      }
+      
+      .welcome-title {
+        font-size: 2rem;
+      }
+      
+      .auth-form-container {
+        padding: var(--spacing-lg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 導覽列 -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">MORNING GLORY</div>
+        </div>
+      </a>
+      
+      <button class="navbar-toggle" id="navbarToggle" aria-label="開啟選單">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
+        <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
+        <li><a href="profile.html" class="navbar-link">👤 會員中心</a></li>
+        <li><a href="login.html" class="navbar-link active">🔐 登入</a></li>
+        <li>
+          <a href="cart.html" class="navbar-link cart-link">
+            🛒 購物車
+            <span class="cart-badge" id="cartBadge">0</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 主要內容 -->
+  <main>
+    <div class="auth-container fade-in">
+      <!-- 左側歡迎區域 -->
+      <div class="auth-welcome">
+        <div class="welcome-icon">🌅</div>
+        <h1 class="welcome-title">歡迎來到<br>晨光早餐店</h1>
+        <p class="welcome-text">
+          加入會員，享受更便利的點餐體驗<br>
+          以及專屬優惠與服務
+        </p>
+        <div class="welcome-features">
+          <div class="feature-item">✓ 快速線上點餐</div>
+          <div class="feature-item">✓ 查看訂單記錄</div>
+          <div class="feature-item">✓ 累積會員點數</div>
+          <div class="feature-item">✓ 獨享會員優惠</div>
+        </div>
+      </div>
+      
+      <!-- 右側表單區域 -->
+      <div class="auth-form-container">
+        <!-- 分頁切換 -->
+        <div class="form-tabs">
+          <button class="tab-btn active" data-tab="login">登入</button>
+          <button class="tab-btn" data-tab="register">註冊</button>
+        </div>
+        
+        <!-- 登入表單 -->
+        <form class="auth-form active" id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">📧 電子郵件</label>
+            <input 
+              type="email" 
+              id="loginEmail" 
+              class="form-input"
+              placeholder="請輸入電子郵件"
+              required
+            >
+            <div class="error-message" id="loginEmailError"></div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">🔒 密碼</label>
+            <input 
+              type="password" 
+              id="loginPassword" 
+              class="form-input"
+              placeholder="請輸入密碼"
+              required
+            >
+            <div class="error-message" id="loginPasswordError"></div>
+          </div>
+          
+          <div class="form-checkbox">
+            <input type="checkbox" id="rememberMe">
+            <label for="rememberMe">記住我</label>
+          </div>
+          
+          <button type="submit" class="submit-btn">登入</button>
+          
+          <div class="form-footer">
+            還不是會員？<a href="#" onclick="switchTab('register'); return false;">立即註冊</a>
+          </div>
+        </form>
+        
+        <!-- 註冊表單 -->
+        <form class="auth-form" id="registerForm">
+          <div class="form-group">
+            <label class="form-label" for="registerName">👤 姓名</label>
+            <input 
+              type="text" 
+              id="registerName" 
+              class="form-input"
+              placeholder="請輸入姓名"
+              required
+            >
+            <div class="error-message" id="registerNameError"></div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="registerEmail">📧 電子郵件</label>
+            <input 
+              type="email" 
+              id="registerEmail" 
+              class="form-input"
+              placeholder="請輸入電子郵件"
+              required
+            >
+            <div class="error-message" id="registerEmailError"></div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="registerPhone">📱 手機號碼</label>
+            <input 
+              type="tel" 
+              id="registerPhone" 
+              class="form-input"
+              placeholder="0912-345-678"
+              required
+            >
+            <div class="error-message" id="registerPhoneError"></div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="registerPassword">🔒 密碼</label>
+            <input 
+              type="password" 
+              id="registerPassword" 
+              class="form-input"
+              placeholder="至少 6 個字元"
+              required
+            >
+            <div class="error-message" id="registerPasswordError"></div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="registerPasswordConfirm">🔒 確認密碼</label>
+            <input 
+              type="password" 
+              id="registerPasswordConfirm" 
+              class="form-input"
+              placeholder="請再次輸入密碼"
+              required
+            >
+            <div class="error-message" id="registerPasswordConfirmError"></div>
+          </div>
+          
+          <div class="form-checkbox">
+            <input type="checkbox" id="agreeTerms" required>
+            <label for="agreeTerms">我同意服務條款與隱私政策</label>
+          </div>
+          
+          <button type="submit" class="submit-btn">註冊</button>
+          
+          <div class="form-footer">
+            已經是會員？<a href="#" onclick="switchTab('login'); return false;">立即登入</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>🌅 關於晨光</h3>
+        <p>
+          自1995年創立以來，晨光早餐店始終堅持使用新鮮食材，
+          為每一位顧客準備美味、健康的早餐。
+          讓每一天都從美好的早晨開始！
+        </p>
+        <div class="footer-social">
+          <a href="#" class="social-icon" aria-label="Facebook">📘</a>
+          <a href="#" class="social-icon" aria-label="Instagram">📷</a>
+          <a href="#" class="social-icon" aria-label="Line">💬</a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>📍 店家資訊</h3>
+        <div class="footer-info">
+          <span class="footer-info-icon">📞</span>
+          <span>(04) 2222-3333</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">📍</span>
+          <span>台中市西區美村路一段123號</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">⏰</span>
+          <span>週一至週日 06:00 - 14:00</span>
+        </div>
+        <div class="footer-info">
+          <span class="footer-info-icon">🚚</span>
+          <span>外送服務：滿 $300 免運費</span>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>🔗 快速連結</h3>
+        <ul>
+          <li><a href="index.html" class="footer-link">首頁</a></li>
+          <li><a href="menu.html" class="footer-link">線上點餐</a></li>
+          <li><a href="profile.html" class="footer-link">會員中心</a></li>
+          <li><a href="login.html" class="footer-link">登入 / 註冊</a></li>
+          <li><a href="cart.html" class="footer-link">購物車</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h3>💡 顧客服務</h3>
+        <ul>
+          <li><a href="#" class="footer-link">常見問題</a></li>
+          <li><a href="#" class="footer-link">外送說明</a></li>
+          <li><a href="#" class="footer-link">付款方式</a></li>
+          <li><a href="#" class="footer-link">退換貨政策</a></li>
+          <li><a href="#" class="footer-link">聯絡我們</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-copyright">
+      <p>&copy; 2025 晨光早餐店 Morning Glory Breakfast Shop. All Rights Reserved.</p>
+      <p>網站設計 by 晨光數位團隊 | 營業登記：12345678</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="js/login.js"></script>
+</body>
+</html>
