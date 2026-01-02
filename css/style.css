@@ -1,0 +1,533 @@
+/* ============================================
+   晨光早餐店 - 主要樣式表
+   設計理念：溫暖、活力、親切的早晨氛圍
+   ============================================ */
+
+/* 引入 Google Fonts - 選擇有特色的字體組合 */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@300;400;600;700;800&display=swap');
+
+/* ============================================
+   CSS 變數 - 統一配色與樣式
+   ============================================ */
+:root {
+  /* 主色調 - 溫暖早晨 */
+  --primary-orange: #FF6B35;
+  --primary-yellow: #FFB627;
+  --warm-cream: #FFF8E7;
+  --soft-peach: #FFE5D9;
+  
+  /* 輔助色 */
+  --accent-red: #F25C54;
+  --accent-green: #73BA9B;
+  --dark-brown: #4A4A48;
+  --light-brown: #8B7355;
+  
+  /* 中性色 */
+  --white: #FFFFFF;
+  --light-gray: #F5F5F5;
+  --medium-gray: #CCCCCC;
+  --dark-gray: #666666;
+  --text-dark: #2C2C2C;
+  
+  /* 字體 */
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+  
+  /* 陰影 */
+  --shadow-sm: 0 2px 8px rgba(255, 107, 53, 0.1);
+  --shadow-md: 0 4px 16px rgba(255, 107, 53, 0.15);
+  --shadow-lg: 0 8px 32px rgba(255, 107, 53, 0.2);
+  
+  /* 圓角 */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+  
+  /* 間距 */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* 轉場動畫 */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* ============================================
+   全域重置與基礎樣式
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-dark);
+  background: linear-gradient(135deg, var(--warm-cream) 0%, var(--soft-peach) 100%);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   導覽列 Navigation Bar
+   ============================================ */
+.navbar {
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: var(--transition-normal);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo 區域 */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(2px 2px 4px rgba(255, 107, 53, 0.3));
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-yellow) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  color: var(--light-brown);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 導覽選單 */
+.navbar-menu {
+  display: flex;
+  gap: var(--spacing-sm);
+  list-style: none;
+  align-items: center;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
+  position: relative;
+}
+
+.navbar-link:hover {
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-yellow) 100%);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-link.active {
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-yellow) 100%);
+  color: var(--white);
+}
+
+/* 購物車圖示特殊樣式 */
+.navbar-link.cart-link {
+  position: relative;
+  background: var(--primary-orange);
+  color: var(--white);
+}
+
+.navbar-link.cart-link:hover {
+  background: var(--accent-red);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accent-red);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--white);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* 漢堡選單按鈕（行動版） */
+.navbar-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+}
+
+.navbar-toggle span {
+  width: 25px;
+  height: 3px;
+  background: var(--primary-orange);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
+}
+
+/* ============================================
+   主要內容區域
+   ============================================ */
+main {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+/* 區塊標題樣式 */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-yellow) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-orange), var(--primary-yellow));
+  border-radius: var(--radius-full);
+}
+
+/* ============================================
+   Footer 頁尾
+   ============================================ */
+.footer {
+  background: linear-gradient(135deg, var(--dark-brown) 0%, var(--light-brown) 100%);
+  color: var(--white);
+  padding: var(--spacing-xl) var(--spacing-md) var(--spacing-md);
+  margin-top: var(--spacing-xl);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.footer-section h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--primary-yellow);
+}
+
+.footer-section p,
+.footer-section ul {
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.8;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section ul li {
+  margin-bottom: var(--spacing-xs);
+  padding-left: 1.2rem;
+  position: relative;
+}
+
+.footer-section ul li::before {
+  content: '☕';
+  position: absolute;
+  left: 0;
+}
+
+.footer-link {
+  color: var(--white);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.footer-link:hover {
+  color: var(--primary-yellow);
+  text-decoration: underline;
+}
+
+/* 店家資訊圖示 */
+.footer-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.footer-info-icon {
+  font-size: 1.2rem;
+  color: var(--primary-yellow);
+}
+
+/* 社群媒體連結 */
+.footer-social {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: var(--transition-fast);
+}
+
+.social-icon:hover {
+  background: var(--primary-yellow);
+  color: var(--dark-brown);
+  transform: translateY(-3px) rotate(5deg);
+  box-shadow: var(--shadow-md);
+}
+
+/* 版權宣告 */
+.footer-copyright {
+  text-align: center;
+  padding-top: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ============================================
+   通用按鈕樣式
+   ============================================ */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-yellow) 100%);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--primary-orange);
+  border: 2px solid var(--primary-orange);
+}
+
+.btn-secondary:hover {
+  background: var(--primary-orange);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   響應式設計 Responsive Design
+   ============================================ */
+
+/* 平板尺寸 */
+@media (max-width: 768px) {
+  .navbar-menu {
+    position: fixed;
+    top: 70px;
+    left: -100%;
+    width: 100%;
+    flex-direction: column;
+    background: var(--white);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-normal);
+    gap: var(--spacing-md);
+  }
+  
+  .navbar-menu.active {
+    left: 0;
+  }
+  
+  .navbar-toggle {
+    display: flex;
+  }
+  
+  .navbar-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  
+  .navbar-toggle.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .navbar-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+  
+  .logo-title {
+    font-size: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 手機尺寸 */
+@media (max-width: 480px) {
+  :root {
+    font-size: 14px;
+  }
+  
+  .navbar-container {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .logo-title {
+    font-size: 1.3rem;
+  }
+  
+  .logo-subtitle {
+    font-size: 0.65rem;
+  }
+  
+  main {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+}
+
+/* ============================================
+   通用工具類別
+   ============================================ */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+
+.hidden {
+  display: none;
+}
+
+/* 載入動畫 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
