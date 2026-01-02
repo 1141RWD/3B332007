@@ -295,6 +295,316 @@
       .products-grid {
         grid-template-columns: 1fr;
       }
+      
+      .news-slider {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .stores-quick-view {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    
+    /* 最新消息區塊 */
+    .news-slider {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-lg);
+    }
+    
+    .news-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-normal);
+      cursor: pointer;
+    }
+    
+    .news-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .news-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    
+    .news-content {
+      padding: var(--spacing-md);
+    }
+    
+    .news-category {
+      display: inline-block;
+      background: var(--primary-orange);
+      color: var(--white);
+      padding: 0.3rem 0.8rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .news-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-xs);
+      line-height: 1.4;
+    }
+    
+    .news-date {
+      font-size: 0.85rem;
+      color: var(--dark-gray);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .news-summary {
+      font-size: 0.95rem;
+      color: var(--dark-gray);
+      line-height: 1.6;
+    }
+    
+    /* 門市快速檢視 */
+    .stores-quick-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--spacing-md);
+    }
+    
+    .store-quick-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-fast);
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    
+    .store-quick-card:hover {
+      border-color: var(--primary-orange);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .store-quick-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-xs);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .store-badge {
+      padding: 0.2rem 0.6rem;
+      background: var(--primary-yellow);
+      color: var(--white);
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    
+    .store-quick-info {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      line-height: 1.6;
+    }
+    
+    .store-quick-actions {
+      display: flex;
+      gap: var(--spacing-xs);
+      margin-top: var(--spacing-sm);
+    }
+    
+    .store-quick-btn {
+      flex: 1;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .btn-order {
+      background: var(--primary-orange);
+      color: var(--white);
+    }
+    
+    .btn-order:hover {
+      background: var(--accent-red);
+    }
+    
+    .btn-call {
+      background: var(--white);
+      color: var(--primary-orange);
+      border: 2px solid var(--primary-orange);
+    }
+    
+    .btn-call:hover {
+      background: var(--primary-orange);
+      color: var(--white);
+    }
+    
+    /* 新聞詳情彈窗 */
+    .news-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+    
+    .news-modal.active {
+      display: flex;
+    }
+    
+    .news-modal-content {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      max-width: 700px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .news-modal-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+    
+    .news-modal-body {
+      padding: var(--spacing-lg);
+    }
+    
+    .news-modal-close {
+      position: absolute;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      background: rgba(0, 0, 0, 0.6);
+      color: var(--white);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      backdrop-filter: blur(5px);
+    }
+    
+    .news-modal-close:hover {
+      background: var(--accent-red);
+      transform: rotate(90deg);
+    }
+    
+    .news-tags {
+      display: flex;
+      gap: var(--spacing-xs);
+      margin-top: var(--spacing-md);
+    }
+    
+    .news-tag {
+      padding: 0.3rem 0.8rem;
+      background: var(--soft-peach);
+      color: var(--primary-orange);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    /* 門市彈窗 */
+    .store-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+    
+    .store-modal.active {
+      display: flex;
+    }
+    
+    .store-modal-content {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      max-width: 600px;
+      width: 100%;
+      padding: var(--spacing-lg);
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .store-modal-close {
+      position: absolute;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      background: transparent;
+      border: none;
+      font-size: 2rem;
+      color: var(--dark-gray);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .store-modal-close:hover {
+      color: var(--accent-red);
+      transform: rotate(90deg);
+    }
+    
+    .store-detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+      padding: var(--spacing-sm);
+      background: var(--soft-peach);
+      border-radius: var(--radius-sm);
+    }
+    
+    .store-detail-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .store-modal-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-lg);
+    }
+    
+    .store-modal-btn {
+      flex: 1;
+      padding: var(--spacing-md);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
     }
   </style>
 </head>
@@ -376,6 +686,14 @@
       </div>
     </section>
 
+    <!-- 最新消息 -->
+    <section class="news-section" style="margin-bottom: var(--spacing-xl);">
+      <h2 class="section-title">📢 最新消息</h2>
+      <div class="news-slider" id="newsSlider">
+        <!-- 由 JavaScript 動態生成 -->
+      </div>
+    </section>
+
     <!-- 精選商品 -->
     <section class="featured-products" id="featured">
       <h2 class="section-title">🌟 本週精選</h2>
@@ -387,6 +705,17 @@
       </div>
     </section>
 
+    <!-- 附近門市 -->
+    <section class="nearby-stores-section" style="margin-bottom: var(--spacing-xl);">
+      <h2 class="section-title">🗺️ 附近門市</h2>
+      <div class="stores-quick-view" id="nearbyStores">
+        <!-- 由 JavaScript 動態生成 -->
+      </div>
+      <div style="text-align: center; margin-top: var(--spacing-lg);">
+        <button class="btn btn-secondary" onclick="showAllStores()">查看所有門市 →</button>
+      </div>
+    </section>
+
     <!-- 營業資訊 -->
     <section class="info-section">
       <h2 class="section-title">📍 店家資訊</h2>
@@ -395,6 +724,38 @@
       </div>
     </section>
   </main>
+
+  <!-- 新聞詳情彈窗 -->
+  <div class="news-modal" id="newsModal">
+    <div class="news-modal-content" style="position: relative;">
+      <button class="news-modal-close" onclick="closeNewsModal()">×</button>
+      <img src="" alt="" class="news-modal-image" id="newsModalImage">
+      <div class="news-modal-body">
+        <span class="news-category" id="newsModalCategory"></span>
+        <h2 id="newsModalTitle" style="font-family: var(--font-display); font-size: 2rem; margin: var(--spacing-md) 0;"></h2>
+        <p id="newsModalDate" style="color: var(--dark-gray); margin-bottom: var(--spacing-md);"></p>
+        <div id="newsModalContent" style="line-height: 1.8; color: var(--text-dark);"></div>
+        <div class="news-tags" id="newsModalTags"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 門市詳情彈窗 -->
+  <div class="store-modal" id="storeModal">
+    <div class="store-modal-content">
+      <button class="store-modal-close" onclick="closeStoreModal()">×</button>
+      <h2 id="storeModalTitle" style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: var(--spacing-lg);"></h2>
+      <div id="storeModalDetails"></div>
+      <div class="store-modal-actions">
+        <button class="store-modal-btn" style="background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow)); color: var(--white);" onclick="orderAtSelectedStore()">
+          🍳 前往點餐
+        </button>
+        <button class="store-modal-btn" style="background: var(--white); color: var(--primary-orange); border: 2px solid var(--primary-orange);" onclick="callSelectedStore()">
+          📞 撥打電話
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 頁尾 -->
   <footer class="footer">
@@ -594,10 +955,229 @@
       `;
     }
     
+    // 顯示最新消息
+    function displayNews() {
+      const slider = document.getElementById('newsSlider');
+      
+      // 只顯示最新 3 則
+      const latestNews = newsItems.slice(0, 3);
+      
+      slider.innerHTML = latestNews.map(news => `
+        <div class="news-card fade-in" onclick="showNewsDetail('${news.id}')">
+          <img src="${news.image}" alt="${news.title}" class="news-image">
+          <div class="news-content">
+            <span class="news-category">${news.category}</span>
+            <h3 class="news-title">${news.title}</h3>
+            <p class="news-date">📅 ${news.date}</p>
+            <p class="news-summary">${news.summary}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 顯示新聞詳情
+    let currentNews = null;
+    
+    function showNewsDetail(newsId) {
+      currentNews = newsItems.find(n => n.id === newsId);
+      if (!currentNews) return;
+      
+      document.getElementById('newsModalImage').src = currentNews.image;
+      document.getElementById('newsModalImage').alt = currentNews.title;
+      document.getElementById('newsModalCategory').textContent = currentNews.category;
+      document.getElementById('newsModalTitle').textContent = currentNews.title;
+      document.getElementById('newsModalDate').textContent = '📅 ' + currentNews.date;
+      document.getElementById('newsModalContent').textContent = currentNews.content;
+      
+      // 顯示標籤
+      const tagsHTML = currentNews.tags.map(tag => 
+        `<span class="news-tag">${tag}</span>`
+      ).join('');
+      document.getElementById('newsModalTags').innerHTML = tagsHTML;
+      
+      document.getElementById('newsModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeNewsModal() {
+      document.getElementById('newsModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    // 顯示附近門市（顯示前 4 家）
+    function displayNearbyStores() {
+      const container = document.getElementById('nearbyStores');
+      
+      const nearbyStores = stores.slice(0, 4);
+      
+      container.innerHTML = nearbyStores.map(store => `
+        <div class="store-quick-card fade-in" onclick="showStoreDetail('${store.id}')">
+          <div class="store-quick-name">
+            <span>${store.name.replace('晨光早餐店 - ', '')}</span>
+            ${store.features.includes('總店') ? '<span class="store-badge">總店</span>' : ''}
+            ${store.features.includes('24H') ? '<span class="store-badge" style="background: var(--accent-green)">24H</span>' : ''}
+          </div>
+          <div class="store-quick-info">
+            <div style="margin-bottom: 0.3rem;">📍 ${store.district}</div>
+            <div style="margin-bottom: 0.3rem;">⏰ ${store.hours}</div>
+            <div>🎯 ${store.services.join('、')}</div>
+          </div>
+          <div class="store-quick-actions">
+            <button class="store-quick-btn btn-order" onclick="event.stopPropagation(); selectStoreAndOrder('${store.id}')">
+              前往點餐
+            </button>
+            <button class="store-quick-btn btn-call" onclick="event.stopPropagation(); callStore('${store.phone}')">
+              📞
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 顯示門市詳情
+    let currentStore = null;
+    
+    function showStoreDetail(storeId) {
+      currentStore = stores.find(s => s.id === storeId);
+      if (!currentStore) return;
+      
+      document.getElementById('storeModalTitle').textContent = currentStore.name;
+      
+      const detailsHTML = `
+        <div class="store-detail-item">
+          <span class="store-detail-icon">📍</span>
+          <div>
+            <strong>地址</strong><br>
+            ${currentStore.address}
+          </div>
+        </div>
+        
+        <div class="store-detail-item">
+          <span class="store-detail-icon">📞</span>
+          <div>
+            <strong>電話</strong><br>
+            ${currentStore.phone}
+          </div>
+        </div>
+        
+        <div class="store-detail-item">
+          <span class="store-detail-icon">⏰</span>
+          <div>
+            <strong>營業時間</strong><br>
+            ${currentStore.hours}
+          </div>
+        </div>
+        
+        <div class="store-detail-item">
+          <span class="store-detail-icon">🎯</span>
+          <div>
+            <strong>提供服務</strong><br>
+            ${currentStore.services.join('、')}
+          </div>
+        </div>
+        
+        ${currentStore.features.length > 0 ? `
+          <div class="store-detail-item">
+            <span class="store-detail-icon">✨</span>
+            <div>
+              <strong>門市特色</strong><br>
+              ${currentStore.features.join('、')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+      
+      document.getElementById('storeModalDetails').innerHTML = detailsHTML;
+      document.getElementById('storeModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeStoreModal() {
+      document.getElementById('storeModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    // 選擇門市並前往點餐
+    function selectStoreAndOrder(storeId) {
+      const store = stores.find(s => s.id === storeId);
+      if (store) {
+        localStorage.setItem('selectedStore', JSON.stringify(store));
+        location.href = 'menu.html';
+      }
+    }
+    
+    function orderAtSelectedStore() {
+      if (currentStore) {
+        localStorage.setItem('selectedStore', JSON.stringify(currentStore));
+        location.href = 'menu.html';
+      }
+    }
+    
+    // 撥打電話
+    function callStore(phone) {
+      const phoneNumber = phone.replace(/[()-\s]/g, '');
+      window.location.href = `tel:${phoneNumber}`;
+    }
+    
+    function callSelectedStore() {
+      if (currentStore) {
+        callStore(currentStore.phone);
+      }
+    }
+    
+    // 查看所有門市
+    function showAllStores() {
+      // 使用彈窗顯示所有門市
+      const modal = document.createElement('div');
+      modal.className = 'store-modal active';
+      modal.innerHTML = `
+        <div class="store-modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+          <button class="store-modal-close" onclick="this.parentElement.parentElement.remove(); document.body.style.overflow = '';">×</button>
+          <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: var(--spacing-lg);">🗺️ 所有門市</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-md);">
+            ${stores.map(store => `
+              <div class="store-quick-card" onclick="showStoreDetail('${store.id}'); this.parentElement.parentElement.parentElement.remove();">
+                <div class="store-quick-name">
+                  <span>${store.name.replace('晨光早餐店 - ', '')}</span>
+                  ${store.features.includes('總店') ? '<span class="store-badge">總店</span>' : ''}
+                </div>
+                <div class="store-quick-info">
+                  <div>📍 ${store.address}</div>
+                  <div>⏰ ${store.hours}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.body.style.overflow = 'hidden';
+    }
+    
+    // 點擊彈窗外部關閉
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'newsModal') {
+        closeNewsModal();
+      }
+      if (e.target.id === 'storeModal') {
+        closeStoreModal();
+      }
+    });
+    
+    // ESC 鍵關閉彈窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeNewsModal();
+        closeStoreModal();
+      }
+    });
+    
     // 頁面載入時執行
     document.addEventListener('DOMContentLoaded', () => {
       updateCartBadge();
+      displayNews();
       displayFeaturedProducts();
+      displayNearbyStores();
       displayStoreInfo();
       
       // 設定當前頁面的導覽連結為 active

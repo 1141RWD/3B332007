@@ -1,125 +1,950 @@
-// 早餐店商品資料庫
+// 早餐店商品資料庫 - 完整客製化版（共84種商品）
+
+// 通用客製化選項
+const commonExtras = {
+  egg: { name: '加蛋', price: 10 },
+  cheese: { name: '加起司', price: 15 },
+  ham: { name: '加火腿', price: 15 },
+  bacon: { name: '加培根', price: 20 },
+  corn: { name: '加玉米', price: 10 },
+  tuna: { name: '加鮪魚', price: 15 },
+  vegetable: { name: '加蔬菜', price: 10 },
+  pork: { name: '加肉鬆', price: 12 }
+};
+
+const sauceOptions = ['番茄醬', '美乃滋', '甜辣醬', '蜂蜜芥末', '黑胡椒醬', '不加醬'];
+const spicyLevels = ['不辣', '小辣', '中辣', '大辣', '特辣'];
+const cookingStyles = ['正常', '稍微焦一點', '不要太焦'];
+
 const products = [
-  // 蛋餅系列
+  // ===== 蛋餅類 (12種) =====
   {
     id: 'egg-crepe-01',
     name: '原味蛋餅',
     price: 30,
     category: '蛋餅',
-    image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=400&h=300&fit=crop',
+    image: 'images/egg-crepe/original.jpg',
     description: '經典手工蛋餅皮，香Q有嚼勁，搭配現煎鮮嫩蛋液',
+    tags: ['人氣', '經典'],
     extras: [
-      { name: '加蛋', price: 10 },
-      { name: '加起司', price: 15 },
-      { name: '加火腿', price: 15 },
-      { name: '加培根', price: 20 }
-    ]
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.ham,
+      commonExtras.bacon,
+      commonExtras.corn,
+      commonExtras.tuna
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
   },
   {
     id: 'egg-crepe-02',
     name: '玉米蛋餅',
     price: 40,
     category: '蛋餅',
-    image: 'https://images.unsplash.com/photo-1619365703203-63f3f3478e1a?w=400&h=300&fit=crop',
+    image: 'images/egg-crepe/corn.jpg',
     description: '香甜玉米粒混入蛋液，每一口都能吃到玉米',
+    tags: ['人氣'],
     extras: [
-      { name: '加蛋', price: 10 },
-      { name: '加起司', price: 15 },
-      { name: '加火腿', price: 15 }
-    ]
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.ham,
+      commonExtras.bacon
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
   },
   {
     id: 'egg-crepe-03',
     name: '起司蛋餅',
     price: 45,
     category: '蛋餅',
-    image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400&h=300&fit=crop',
+    image: 'images/egg-crepe/cheese.jpg',
     description: '雙倍起司拉絲享受，濃郁奶香與蛋餅完美結合',
+    tags: ['人氣'],
     extras: [
-      { name: '加蛋', price: 10 },
+      commonExtras.egg,
       { name: '再加起司', price: 15 },
-      { name: '加培根', price: 20 }
-    ]
+      commonExtras.ham,
+      commonExtras.bacon
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-04',
+    name: '鮪魚蛋餅',
+    price: 45,
+    category: '蛋餅',
+    image: 'images/egg-crepe/tuna.jpg',
+    description: '新鮮鮪魚沙拉搭配蛋餅，鹹香好滋味',
+    tags: ['店長推薦'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.corn
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-05',
+    name: '培根蛋餅',
+    price: 50,
+    category: '蛋餅',
+    image: 'images/egg-crepe/bacon.jpg',
+    description: '酥脆培根配蛋餅，超級滿足',
+    tags: ['人氣'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加雙倍培根', price: 30 }
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-06',
+    name: '火腿蛋餅',
+    price: 45,
+    category: '蛋餅',
+    image: 'images/egg-crepe/ham.jpg',
+    description: '經典火腿搭配，營養豐富',
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.bacon
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-07',
+    name: '蔬菜蛋餅',
+    price: 40,
+    category: '蛋餅',
+    image: 'images/egg-crepe/vegetable.jpg',
+    description: '新鮮蔬菜，健康首選',
+    tags: ['素食'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加雙倍蔬菜', price: 15 }
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-08',
+    name: '肉鬆蛋餅',
+    price: 45,
+    category: '蛋餅',
+    image: 'images/egg-crepe/pork-floss.jpg',
+    description: '香酥肉鬆，古早味',
+    tags: ['經典'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加雙倍肉鬆', price: 18 }
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-09',
+    name: '總匯蛋餅',
+    price: 60,
+    category: '蛋餅',
+    image: 'images/egg-crepe/special.jpg',
+    description: '火腿+培根+起司，超豪華組合',
+    tags: ['店長推薦', '人氣'],
+    extras: [
+      commonExtras.egg,
+      { name: '升級雙倍肉量', price: 30 }
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-10',
+    name: '蘑菇蛋餅',
+    price: 48,
+    category: '蛋餅',
+    image: 'images/egg-crepe/mushroom.jpg',
+    description: '新鮮蘑菇，口感豐富',
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加雙倍蘑菇', price: 15 }
+    ],
+    sauceOptions: sauceOptions,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-11',
+    name: '泡菜蛋餅',
+    price: 45,
+    category: '蛋餅',
+    image: 'images/egg-crepe/kimchi.jpg',
+    description: '韓式泡菜，酸辣開胃',
+    tags: ['辣味', '新品'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加雙倍泡菜', price: 15 }
+    ],
+    sauceOptions: sauceOptions,
+    spicyLevel: spicyLevels,
+    cookingStyle: cookingStyles
+  },
+  {
+    id: 'egg-crepe-12',
+    name: '黑胡椒蛋餅',
+    price: 40,
+    category: '蛋餅',
+    image: 'images/egg-crepe/pepper.jpg',
+    description: '黑胡椒香氣十足',
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.bacon
+    ],
+    sauceOptions: sauceOptions,
+    spicyLevel: ['不辣', '正常', '加辣'],
+    cookingStyle: cookingStyles
   },
 
-  // 漢堡系列
+  // ===== 漢堡類 (10種) =====
   {
     id: 'burger-01',
     name: '豬肉漢堡',
     price: 45,
     category: '漢堡',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
-    description: '厚切豬肉排現煎，搭配生菜番茄與特製美乃滋',
+    image: 'images/burger/pork.jpg',
+    description: 'juicy豬肉排，鮮嫩多汁',
+    tags: ['人氣'],
     extras: [
-      { name: '加蛋', price: 10 },
-      { name: '加起司', price: 15 },
-      { name: '雙層肉', price: 25 }
-    ]
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.bacon,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加洋蔥', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
   },
   {
     id: 'burger-02',
-    name: '雞腿漢堡',
+    name: '雞肉漢堡',
+    price: 45,
+    category: '漢堡',
+    image: 'images/burger/chicken.jpg',
+    description: '香嫩雞腿排，口感絕佳',
+    tags: ['人氣'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.bacon,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-03',
+    name: '牛肉漢堡',
+    price: 65,
+    category: '漢堡',
+    image: 'images/burger/beef.jpg',
+    description: '厚切牛肉，肉汁豐富',
+    tags: ['店長推薦'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      commonExtras.bacon,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加洋蔥', price: 5 },
+      { name: '加酸黃瓜', price: 8 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包'],
+    pattyDoneness: ['三分熟', '五分熟', '七分熟', '全熟']
+  },
+  {
+    id: 'burger-04',
+    name: '魚排漢堡',
+    price: 50,
+    category: '漢堡',
+    image: 'images/burger/fish.jpg',
+    description: '酥炸魚排，海洋風味',
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加塔塔醬', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-05',
+    name: '培根蛋漢堡',
+    price: 58,
+    category: '漢堡',
+    image: 'images/burger/bacon-egg.jpg',
+    description: '雙層培根搭配煎蛋',
+    tags: ['人氣'],
+    extras: [
+      commonExtras.cheese,
+      { name: '加雙倍培根', price: 30 },
+      { name: '加生菜', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['荷包蛋', '全熟蛋', '半熟蛋（流心）'],
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-06',
+    name: '起司豬肉堡',
     price: 55,
     category: '漢堡',
-    image: 'https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&h=300&fit=crop',
-    description: '去骨雞腿排醃製入味，外酥內嫩多汁',
+    image: 'images/burger/cheese-pork.jpg',
+    description: '雙層起司融化誘人',
+    tags: ['人氣'],
     extras: [
-      { name: '加蛋', price: 10 },
-      { name: '加起司', price: 15 },
-      { name: '辣味醬', price: 0 }
-    ]
+      commonExtras.egg,
+      { name: '加三層起司', price: 25 },
+      commonExtras.bacon,
+      { name: '加生菜', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-07',
+    name: '總匯漢堡',
+    price: 75,
+    category: '漢堡',
+    image: 'images/burger/special.jpg',
+    description: '豬肉+雞肉+培根+起司+蛋',
+    tags: ['店長推薦', '人氣'],
+    extras: [
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加洋蔥', price: 5 },
+      { name: '升級雙倍肉量', price: 40 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-08',
+    name: '辣味雞腿堡',
+    price: 52,
+    category: '漢堡',
+    image: 'images/burger/spicy-chicken.jpg',
+    description: '香辣雞腿排，刺激味蕾',
+    tags: ['辣味', '新品'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加生菜', price: 5 },
+      { name: '加墨西哥辣椒', price: 8 }
+    ],
+    sauceOptions: sauceOptions,
+    spicyLevel: spicyLevels,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-09',
+    name: '蔬菜漢堡',
+    price: 42,
+    category: '漢堡',
+    image: 'images/burger/vegetable.jpg',
+    description: '健康蔬菜搭配，清爽美味',
+    tags: ['素食'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加雙倍蔬菜', price: 10 },
+      { name: '加酪梨', price: 20 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
+  },
+  {
+    id: 'burger-10',
+    name: '鐵板豬排堡',
+    price: 58,
+    category: '漢堡',
+    image: 'images/burger/grilled-pork.jpg',
+    description: '鐵板現煎，香氣四溢',
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['原味麵包', '全麥麵包', '芝麻麵包']
   },
 
-  // 吐司系列
+  // ===== 吐司類 (12種) =====
   {
     id: 'toast-01',
-    name: '火腿蛋吐司',
-    price: 35,
+    name: '花生吐司',
+    price: 25,
     category: '吐司',
-    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=300&fit=crop',
-    description: '經典組合，厚片吐司烤得金黃酥脆',
+    image: 'images/toast/peanut.jpg',
+    description: '香濃花生醬，經典美味',
+    tags: ['經典'],
     extras: [
-      { name: '加蛋', price: 10 },
-      { name: '加起司', price: 15 },
-      { name: '加培根', price: 20 }
-    ]
+      { name: '加奶油', price: 5 },
+      { name: '加煉乳', price: 8 }
+    ],
+    toastLevel: ['淺烤', '正常', '酥脆'],
+    spreadAmount: ['正常', '多一點', '少一點']
   },
   {
     id: 'toast-02',
-    name: '鮪魚蛋吐司',
-    price: 40,
+    name: '草莓吐司',
+    price: 30,
     category: '吐司',
-    image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=300&fit=crop',
-    description: '自製鮪魚沙拉，搭配新鮮雞蛋與生菜',
+    image: 'images/toast/strawberry.jpg',
+    description: '酸甜草莓醬，清新口感',
     extras: [
-      { name: '加蛋', price: 10 },
-      { name: '加起司', price: 15 }
-    ]
+      { name: '加奶油', price: 5 },
+      { name: '加煉乳', price: 8 }
+    ],
+    toastLevel: ['淺烤', '正常', '酥脆'],
+    spreadAmount: ['正常', '多一點', '少一點']
   },
   {
     id: 'toast-03',
-    name: '花生厚片',
+    name: '巧克力吐司',
     price: 30,
     category: '吐司',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop',
-    description: '濃郁花生醬塗抹厚片吐司，懷舊經典味',
+    image: 'images/toast/chocolate.jpg',
+    description: '濃郁巧克力，甜蜜滿分',
     extras: [
       { name: '加奶油', price: 5 },
-      { name: '加煉乳', price: 10 }
-    ]
+      { name: '加棉花糖', price: 10 }
+    ],
+    toastLevel: ['淺烤', '正常', '酥脆'],
+    spreadAmount: ['正常', '多一點', '少一點']
+  },
+  {
+    id: 'toast-04',
+    name: '奶酥吐司',
+    price: 35,
+    category: '吐司',
+    image: 'images/toast/butter-crisp.jpg',
+    description: '香酥奶酥，口感豐富',
+    tags: ['人氣'],
+    extras: [
+      { name: '加煉乳', price: 8 }
+    ],
+    toastLevel: ['正常', '酥脆'],
+    spreadAmount: ['正常', '多一點']
+  },
+  {
+    id: 'toast-05',
+    name: '火腿蛋吐司',
+    price: 42,
+    category: '吐司',
+    image: 'images/toast/ham-egg.jpg',
+    description: '經典組合，營養均衡',
+    tags: ['人氣'],
+    extras: [
+      commonExtras.cheese,
+      { name: '加雙倍火腿', price: 20 },
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['煎蛋', '炒蛋'],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-06',
+    name: '培根蛋吐司',
+    price: 48,
+    category: '吐司',
+    image: 'images/toast/bacon-egg.jpg',
+    description: '酥脆培根配煎蛋',
+    tags: ['人氣'],
+    extras: [
+      commonExtras.cheese,
+      { name: '加雙倍培根', price: 30 },
+      { name: '加生菜', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['煎蛋', '炒蛋'],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-07',
+    name: '鮪魚蛋吐司',
+    price: 48,
+    category: '吐司',
+    image: 'images/toast/tuna-egg.jpg',
+    description: '鮮美鮪魚，營養滿分',
+    extras: [
+      commonExtras.cheese,
+      { name: '加玉米', price: 10 },
+      { name: '加生菜', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['煎蛋', '炒蛋'],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-08',
+    name: '起司吐司',
+    price: 38,
+    category: '吐司',
+    image: 'images/toast/cheese.jpg',
+    description: '濃郁起司，拉絲誘人',
+    tags: ['人氣'],
+    extras: [
+      { name: '加雙倍起司', price: 20 },
+      { name: '加火腿', price: 15 }
+    ],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-09',
+    name: '肉鬆蛋吐司',
+    price: 42,
+    category: '吐司',
+    image: 'images/toast/pork-egg.jpg',
+    description: '香酥肉鬆，古早味',
+    tags: ['經典'],
+    extras: [
+      commonExtras.cheese,
+      { name: '加雙倍肉鬆', price: 18 }
+    ],
+    sauceOptions: ['美乃滋', '不加醬'],
+    eggStyle: ['煎蛋', '炒蛋'],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-10',
+    name: '總匯吐司',
+    price: 58,
+    category: '吐司',
+    image: 'images/toast/special.jpg',
+    description: '火腿+培根+起司+蛋',
+    tags: ['店長推薦'],
+    extras: [
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '升級雙倍肉量', price: 30 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['煎蛋', '炒蛋'],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-11',
+    name: '玉米蛋吐司',
+    price: 42,
+    category: '吐司',
+    image: 'images/toast/corn-egg.jpg',
+    description: '香甜玉米粒，營養美味',
+    extras: [
+      commonExtras.cheese,
+      { name: '加雙倍玉米', price: 15 },
+      { name: '加火腿', price: 15 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['煎蛋', '炒蛋'],
+    toastLevel: ['淺烤', '正常', '酥脆']
+  },
+  {
+    id: 'toast-12',
+    name: '蜂蜜吐司',
+    price: 30,
+    category: '吐司',
+    image: 'images/toast/honey.jpg',
+    description: '天然蜂蜜，香甜可口',
+    extras: [
+      { name: '加奶油', price: 5 },
+      { name: '加雙倍蜂蜜', price: 10 }
+    ],
+    toastLevel: ['淺烤', '正常', '酥脆']
   },
 
-  // 飲料系列
+  // ===== 三明治類 (8種) =====
+  {
+    id: 'sandwich-01',
+    name: '總匯三明治',
+    price: 62,
+    category: '三明治',
+    image: 'images/sandwich/club.jpg',
+    description: '豐富配料，層次分明',
+    tags: ['店長推薦', '人氣'],
+    extras: [
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加小黃瓜', price: 5 },
+      { name: '升級雙倍肉量', price: 35 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-02',
+    name: '火腿起司三明治',
+    price: 52,
+    category: '三明治',
+    image: 'images/sandwich/ham-cheese.jpg',
+    description: '經典組合，美味不膩',
+    tags: ['人氣'],
+    extras: [
+      commonExtras.egg,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加雙倍起司', price: 20 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-03',
+    name: '鮪魚三明治',
+    price: 56,
+    category: '三明治',
+    image: 'images/sandwich/tuna.jpg',
+    description: '新鮮鮪魚沙拉',
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加玉米', price: 10 },
+      { name: '加生菜', price: 5 }
+    ],
+    sauceOptions: ['美乃滋', '千島醬', '不加醬'],
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-04',
+    name: '雞肉三明治',
+    price: 56,
+    category: '三明治',
+    image: 'images/sandwich/chicken.jpg',
+    description: '嫩雞胸肉，低脂健康',
+    extras: [
+      commonExtras.cheese,
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加小黃瓜', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-05',
+    name: '培根生菜三明治',
+    price: 62,
+    category: '三明治',
+    image: 'images/sandwich/blt.jpg',
+    description: '酥脆培根配新鮮生菜',
+    tags: ['人氣'],
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加番茄', price: 5 },
+      { name: '加雙倍培根', price: 30 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-06',
+    name: '蔬菜三明治',
+    price: 48,
+    category: '三明治',
+    image: 'images/sandwich/vegetable.jpg',
+    description: '健康蔬菜，清爽無負擔',
+    tags: ['素食'],
+    extras: [
+      commonExtras.egg,
+      commonExtras.cheese,
+      { name: '加酪梨', price: 20 },
+      { name: '加雙倍蔬菜', price: 10 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-07',
+    name: '起司蛋三明治',
+    price: 48,
+    category: '三明治',
+    image: 'images/sandwich/cheese-egg.jpg',
+    description: '濃郁起司加煎蛋',
+    extras: [
+      { name: '加雙倍起司', price: 20 },
+      { name: '加火腿', price: 15 },
+      { name: '加生菜', price: 5 }
+    ],
+    sauceOptions: sauceOptions,
+    eggStyle: ['煎蛋', '炒蛋'],
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+  {
+    id: 'sandwich-08',
+    name: '豬排三明治',
+    price: 68,
+    category: '三明治',
+    image: 'images/sandwich/pork-cutlet.jpg',
+    description: '厚切豬排，份量十足',
+    tags: ['店長推薦'],
+    extras: [
+      commonExtras.cheese,
+      { name: '加蛋', price: 10 },
+      { name: '加生菜', price: 5 },
+      { name: '加番茄', price: 5 },
+      { name: '加高麗菜絲', price: 8 }
+    ],
+    sauceOptions: sauceOptions,
+    breadType: ['白吐司', '全麥吐司'],
+    cutStyle: ['對切', '不切', '切成四份']
+  },
+
+  // ===== 飯糰類 (6種) =====
+  {
+    id: 'rice-ball-01',
+    name: '傳統飯糰',
+    price: 35,
+    category: '飯糰',
+    image: 'images/rice-ball/traditional.jpg',
+    description: '古早味飯糰，滿滿回憶',
+    tags: ['經典'],
+    extras: [
+      { name: '加油條', price: 5 },
+      { name: '加菜脯', price: 5 },
+      { name: '加肉鬆', price: 12 },
+      { name: '加蛋', price: 10 }
+    ],
+    riceType: ['白米', '紫米', '糙米'],
+    wrapStyle: ['海苔包', '飯在外']
+  },
+  {
+    id: 'rice-ball-02',
+    name: '肉鬆飯糰',
+    price: 40,
+    category: '飯糰',
+    image: 'images/rice-ball/pork-floss.jpg',
+    description: '香酥肉鬆，鹹香美味',
+    tags: ['人氣'],
+    extras: [
+      { name: '加油條', price: 5 },
+      { name: '加菜脯', price: 5 },
+      { name: '加雙倍肉鬆', price: 18 },
+      { name: '加蛋', price: 10 }
+    ],
+    riceType: ['白米', '紫米', '糙米'],
+    wrapStyle: ['海苔包', '飯在外']
+  },
+  {
+    id: 'rice-ball-03',
+    name: '鮪魚飯糰',
+    price: 45,
+    category: '飯糰',
+    image: 'images/rice-ball/tuna.jpg',
+    description: '新鮮鮪魚，營養豐富',
+    extras: [
+      { name: '加油條', price: 5 },
+      { name: '加玉米', price: 10 },
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 }
+    ],
+    riceType: ['白米', '紫米', '糙米'],
+    wrapStyle: ['海苔包', '飯在外']
+  },
+  {
+    id: 'rice-ball-04',
+    name: '肉鬆蛋飯糰',
+    price: 48,
+    category: '飯糰',
+    image: 'images/rice-ball/pork-egg.jpg',
+    description: '肉鬆加煎蛋，雙重美味',
+    tags: ['人氣'],
+    extras: [
+      { name: '加油條', price: 5 },
+      { name: '加菜脯', price: 5 },
+      { name: '加雙倍肉鬆', price: 18 },
+      { name: '加起司', price: 15 }
+    ],
+    riceType: ['白米', '紫米', '糙米'],
+    wrapStyle: ['海苔包', '飯在外']
+  },
+  {
+    id: 'rice-ball-05',
+    name: '素食飯糰',
+    price: 38,
+    category: '飯糰',
+    image: 'images/rice-ball/vegetable.jpg',
+    description: '健康素食，清爽美味',
+    tags: ['素食'],
+    extras: [
+      { name: '加油條', price: 5 },
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加雙倍蔬菜', price: 10 }
+    ],
+    riceType: ['白米', '紫米', '糙米'],
+    wrapStyle: ['海苔包', '飯在外']
+  },
+  {
+    id: 'rice-ball-06',
+    name: '韓式泡菜飯糰',
+    price: 48,
+    category: '飯糰',
+    image: 'images/rice-ball/kimchi.jpg',
+    description: '韓式泡菜，酸辣開胃',
+    tags: ['辣味', '新品'],
+    extras: [
+      { name: '加油條', price: 5 },
+      { name: '加雙倍泡菜', price: 15 },
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 }
+    ],
+    riceType: ['白米', '紫米', '糙米'],
+    wrapStyle: ['海苔包', '飯在外'],
+    spicyLevel: spicyLevels
+  },
+
+  // ===== 鐵板麵類 (6種) =====
+  {
+    id: 'noodle-01',
+    name: '黑胡椒鐵板麵',
+    price: 65,
+    category: '鐵板麵',
+    image: 'images/noodle/black-pepper.jpg',
+    description: '香濃黑胡椒，口感絕佳',
+    tags: ['人氣'],
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加肉量', price: 20 },
+      { name: '加蔬菜', price: 10 }
+    ],
+    noodleType: ['油麵', '烏龍麵', '寬麵', '義大利麵'],
+    spicyLevel: ['不辣', '正常', '加辣', '特辣'],
+    sideDish: ['不加', '加荷包蛋', '加玉米', '加高麗菜']
+  },
+  {
+    id: 'noodle-02',
+    name: '蘑菇鐵板麵',
+    price: 65,
+    category: '鐵板麵',
+    image: 'images/noodle/mushroom.jpg',
+    description: '新鮮蘑菇，香氣四溢',
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加雙倍蘑菇', price: 20 },
+      { name: '加蔬菜', price: 10 }
+    ],
+    noodleType: ['油麵', '烏龍麵', '寬麵', '義大利麵'],
+    sideDish: ['不加', '加荷包蛋', '加玉米', '加高麗菜']
+  },
+  {
+    id: 'noodle-03',
+    name: '培根鐵板麵',
+    price: 70,
+    category: '鐵板麵',
+    image: 'images/noodle/bacon.jpg',
+    description: '酥脆培根，濃郁美味',
+    tags: ['人氣'],
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加雙倍培根', price: 30 },
+      { name: '加蔬菜', price: 10 }
+    ],
+    noodleType: ['油麵', '烏龍麵', '寬麵', '義大利麵'],
+    sideDish: ['不加', '加荷包蛋', '加玉米', '加高麗菜']
+  },
+  {
+    id: 'noodle-04',
+    name: '雞肉鐵板麵',
+    price: 70,
+    category: '鐵板麵',
+    image: 'images/noodle/chicken.jpg',
+    description: '嫩雞肉塊，營養滿分',
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加雙倍雞肉', price: 30 },
+      { name: '加蔬菜', price: 10 }
+    ],
+    noodleType: ['油麵', '烏龍麵', '寬麵', '義大利麵'],
+    sideDish: ['不加', '加荷包蛋', '加玉米', '加高麗菜']
+  },
+  {
+    id: 'noodle-05',
+    name: '泡菜鐵板麵',
+    price: 65,
+    category: '鐵板麵',
+    image: 'images/noodle/kimchi.jpg',
+    description: '韓式泡菜，酸辣過癮',
+    tags: ['辣味'],
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加雙倍泡菜', price: 20 },
+      { name: '加肉量', price: 20 }
+    ],
+    noodleType: ['油麵', '烏龍麵', '寬麵', '義大利麵'],
+    spicyLevel: spicyLevels,
+    sideDish: ['不加', '加荷包蛋', '加玉米', '加高麗菜']
+  },
+  {
+    id: 'noodle-06',
+    name: '海鮮鐵板麵',
+    price: 80,
+    category: '鐵板麵',
+    image: 'images/noodle/seafood.jpg',
+    description: '多種海鮮，鮮美可口',
+    tags: ['店長推薦'],
+    extras: [
+      { name: '加蛋', price: 10 },
+      { name: '加起司', price: 15 },
+      { name: '加雙倍海鮮', price: 40 },
+      { name: '加蔬菜', price: 10 }
+    ],
+    noodleType: ['油麵', '烏龍麵', '寬麵', '義大利麵'],
+    spicyLevel: ['不辣', '正常', '加辣'],
+    sideDish: ['不加', '加荷包蛋', '加玉米', '加高麗菜']
+  },
+
+  // ===== 飲料類 (18種) =====
   {
     id: 'drink-01',
-    name: '古早味紅茶',
+    name: '紅茶',
     price: 20,
     category: '飲料',
-    image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=300&fit=crop',
-    description: '傳統紅茶熬煮，茶香濃郁回甘',
+    image: 'images/drink/black-tea.jpg',
+    description: '古早味紅茶，解渴首選',
+    tags: ['經典'],
     options: {
-      sweetness: ['正常甜', '少糖', '半糖', '微糖', '無糖'],
-      ice: ['正常冰', '少冰', '微冰', '去冰', '熱']
+      sweetness: ['正常糖', '少糖', '半糖', '微糖', '無糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      size: ['中杯', '大杯(+$5)']
     }
   },
   {
@@ -127,11 +952,13 @@ const products = [
     name: '奶茶',
     price: 25,
     category: '飲料',
-    image: 'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=400&h=300&fit=crop',
-    description: '香醇紅茶搭配濃郁鮮奶，奶香十足',
+    image: 'images/drink/milk-tea.jpg',
+    description: '香濃奶茶，滑順好喝',
+    tags: ['人氣'],
     options: {
-      sweetness: ['正常甜', '少糖', '半糖', '微糖', '無糖'],
-      ice: ['正常冰', '少冰', '微冰', '去冰', '熱']
+      sweetness: ['正常糖', '少糖', '半糖', '微糖', '無糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      size: ['中杯', '大杯(+$5)']
     }
   },
   {
@@ -139,57 +966,383 @@ const products = [
     name: '豆漿',
     price: 20,
     category: '飲料',
-    image: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400&h=300&fit=crop',
+    image: 'images/drink/soy-milk.jpg',
     description: '每日新鮮現磨豆漿，營養健康',
+    tags: ['人氣'],
     options: {
       sweetness: ['原味', '微糖', '無糖'],
-      ice: ['熱豆漿', '溫豆漿', '冰豆漿']
+      temperature: ['熱豆漿', '溫豆漿', '冰豆漿'],
+      size: ['中杯', '大杯(+$5)']
     }
   },
   {
     id: 'drink-04',
-    name: '柳橙汁',
+    name: '咖啡',
     price: 30,
     category: '飲料',
-    image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop',
+    image: 'images/drink/coffee.jpg',
+    description: '現煮咖啡，提神醒腦',
+    tags: ['人氣'],
+    options: {
+      sweetness: ['正常糖', '少糖', '微糖', '無糖'],
+      type: ['美式', '拿鐵(+$10)'],
+      ice: ['熱咖啡', '冰咖啡'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-05',
+    name: '綠茶',
+    price: 20,
+    category: '飲料',
+    image: 'images/drink/green-tea.jpg',
+    description: '清新綠茶，回甘順口',
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖', '微糖', '無糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-06',
+    name: '冬瓜茶',
+    price: 20,
+    category: '飲料',
+    image: 'images/drink/winter-melon.jpg',
+    description: '古早味冬瓜茶',
+    tags: ['經典'],
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖', '微糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-07',
+    name: '檸檬綠茶',
+    price: 30,
+    category: '飲料',
+    image: 'images/drink/lemon-tea.jpg',
+    description: '酸甜檸檬，清爽解膩',
+    tags: ['人氣'],
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖', '微糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰'],
+      lemonAmount: ['正常', '多檸檬(+$5)', '少檸檬'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-08',
+    name: '柳橙汁',
+    price: 35,
+    category: '飲料',
+    image: 'images/drink/orange-juice.jpg',
     description: '100%現榨柳橙汁，維他命C滿滿',
     options: {
       sweetness: ['原味'],
-      ice: ['正常冰', '少冰', '去冰']
+      ice: ['正常冰', '少冰', '去冰'],
+      size: ['中杯', '大杯(+$10)']
+    }
+  },
+  {
+    id: 'drink-09',
+    name: '蘋果汁',
+    price: 35,
+    category: '飲料',
+    image: 'images/drink/apple-juice.jpg',
+    description: '新鮮蘋果，香甜可口',
+    options: {
+      ice: ['正常冰', '少冰', '微冰'],
+      size: ['中杯', '大杯(+$10)']
+    }
+  },
+  {
+    id: 'drink-10',
+    name: '可可',
+    price: 30,
+    category: '飲料',
+    image: 'images/drink/cocoa.jpg',
+    description: '濃郁可可，香醇滑順',
+    options: {
+      sweetness: ['正常糖', '少糖', '微糖'],
+      temperature: ['熱可可', '冰可可'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-11',
+    name: '鮮奶茶',
+    price: 35,
+    category: '飲料',
+    image: 'images/drink/fresh-milk-tea.jpg',
+    description: '鮮奶調製，香濃美味',
+    tags: ['人氣'],
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖', '微糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-12',
+    name: '珍珠奶茶',
+    price: 40,
+    category: '飲料',
+    image: 'images/drink/bubble-tea.jpg',
+    description: 'Q彈珍珠，經典必喝',
+    tags: ['人氣'],
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖', '微糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰'],
+      pearls: ['正常珍珠', '多珍珠(+$5)', '少珍珠', '不加珍珠(-$5)'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-13',
+    name: '烏龍茶',
+    price: 25,
+    category: '飲料',
+    image: 'images/drink/oolong-tea.jpg',
+    description: '清香烏龍，回甘無窮',
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖', '微糖', '無糖'],
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-14',
+    name: '蜂蜜檸檬',
+    price: 35,
+    category: '飲料',
+    image: 'images/drink/honey-lemon.jpg',
+    description: '天然蜂蜜加檸檬',
+    options: {
+      ice: ['正常冰', '少冰', '微冰', '去冰', '溫', '熱'],
+      honeyAmount: ['正常', '多蜂蜜(+$5)', '少蜂蜜'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-15',
+    name: '紅茶拿鐵',
+    price: 40,
+    category: '飲料',
+    image: 'images/drink/black-tea-latte.jpg',
+    description: '紅茶加鮮奶，雙重享受',
+    tags: ['新品'],
+    options: {
+      sweetness: ['正常糖', '少糖', '微糖'],
+      ice: ['熱飲', '冰飲'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-16',
+    name: '抹茶拿鐵',
+    price: 45,
+    category: '飲料',
+    image: 'images/drink/matcha-latte.jpg',
+    description: '濃郁抹茶，日式風味',
+    tags: ['新品'],
+    options: {
+      sweetness: ['正常糖', '少糖', '微糖'],
+      ice: ['熱飲', '冰飲'],
+      matchaLevel: ['正常', '濃抹茶(+$5)'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-17',
+    name: '多多綠茶',
+    price: 35,
+    category: '飲料',
+    image: 'images/drink/yakult-tea.jpg',
+    description: '養樂多加綠茶，酸甜好喝',
+    tags: ['人氣'],
+    options: {
+      sweetness: ['正常糖', '少糖', '半糖'],
+      ice: ['正常冰', '少冰', '微冰'],
+      yakultAmount: ['1瓶', '2瓶(+$10)'],
+      size: ['中杯', '大杯(+$5)']
+    }
+  },
+  {
+    id: 'drink-18',
+    name: '冰淇淋紅茶',
+    price: 45,
+    category: '飲料',
+    image: 'images/drink/ice-cream-tea.jpg',
+    description: '紅茶加冰淇淋，夏日首選',
+    tags: ['季節限定'],
+    options: {
+      sweetness: ['正常糖', '少糖'],
+      flavor: ['香草', '巧克力', '草莓']
     }
   },
 
-  // 點心系列
+  // ===== 點心類 (12種) =====
   {
     id: 'snack-01',
     name: '薯餅',
     price: 15,
     category: '點心',
-    image: 'https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&h=300&fit=crop',
+    image: 'images/snack/hash-brown.jpg',
     description: '金黃酥脆薯餅，內軟外酥',
-    extras: []
+    tags: ['人氣'],
+    extras: [
+      { name: '加起司', price: 10 },
+      { name: '加培根碎', price: 15 }
+    ],
+    dippingSauce: ['番茄醬', '不加醬']
   },
   {
     id: 'snack-02',
-    name: '雞塊（5塊）',
-    price: 35,
-    category: '點心',
-    image: 'https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=300&fit=crop',
-    description: '酥脆雞塊，搭配番茄醬或甜辣醬',
-    extras: [
-      { name: '加醬', price: 0 }
-    ]
-  },
-  {
-    id: 'snack-03',
     name: '薯條',
     price: 30,
     category: '點心',
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=300&fit=crop',
+    image: 'images/snack/fries.jpg',
     description: '現炸酥脆薯條，份量十足',
+    tags: ['人氣'],
     extras: [
-      { name: '加起司醬', price: 10 }
-    ]
+      { name: '加起司醬', price: 10 },
+      { name: '升級大份(+50%)', price: 15 }
+    ],
+    dippingSauce: ['番茄醬', '美乃滋', '甜辣醬', '不加醬'],
+    seasoning: ['原味', '海鹽', '起司粉', '梅子粉']
+  },
+  {
+    id: 'snack-03',
+    name: '雞塊（5塊）',
+    price: 35,
+    category: '點心',
+    image: 'images/snack/chicken-nuggets.jpg',
+    description: '酥脆雞塊，搭配番茄醬或甜辣醬',
+    tags: ['人氣'],
+    extras: [
+      { name: '加5塊', price: 30 },
+      { name: '加10塊', price: 55 }
+    ],
+    dippingSauce: ['番茄醬', '甜辣醬', '蜂蜜芥末', '不加醬']
+  },
+  {
+    id: 'snack-04',
+    name: '雞米花',
+    price: 38,
+    category: '點心',
+    image: 'images/snack/popcorn-chicken.jpg',
+    description: '一口一個，停不下來',
+    extras: [
+      { name: '升級大份(+50%)', price: 18 }
+    ],
+    dippingSauce: ['番茄醬', '甜辣醬', '胡椒鹽', '不加醬'],
+    spicyLevel: ['不辣', '微辣', '中辣', '重辣']
+  },
+  {
+    id: 'snack-05',
+    name: '洋蔥圈',
+    price: 35,
+    category: '點心',
+    image: 'images/snack/onion-rings.jpg',
+    description: '香酥洋蔥，美味可口',
+    extras: [
+      { name: '升級大份(+50%)', price: 15 }
+    ],
+    dippingSauce: ['番茄醬', '美乃滋', '千島醬', '不加醬']
+  },
+  {
+    id: 'snack-06',
+    name: '起司條',
+    price: 40,
+    category: '點心',
+    image: 'images/snack/mozzarella-sticks.jpg',
+    description: '濃郁起司，拉絲誘人',
+    tags: ['人氣'],
+    extras: [
+      { name: '加5條', price: 35 }
+    ],
+    dippingSauce: ['番茄醬', '蜂蜜芥末', '不加醬']
+  },
+  {
+    id: 'snack-07',
+    name: '魚條',
+    price: 35,
+    category: '點心',
+    image: 'images/snack/fish-fingers.jpg',
+    description: '新鮮魚肉，營養美味',
+    extras: [
+      { name: '加5條', price: 30 }
+    ],
+    dippingSauce: ['塔塔醬', '檸檬汁', '番茄醬', '不加醬']
+  },
+  {
+    id: 'snack-08',
+    name: '雞翅',
+    price: 45,
+    category: '點心',
+    image: 'images/snack/chicken-wings.jpg',
+    description: '多汁雞翅，香嫩美味',
+    tags: ['人氣'],
+    extras: [
+      { name: '加3隻', price: 40 }
+    ],
+    flavor: ['原味', '蒜味', '辣味', '蜜汁'],
+    dippingSauce: ['不加醬', '甜辣醬', '蜂蜜芥末']
+  },
+  {
+    id: 'snack-09',
+    name: '熱狗',
+    price: 25,
+    category: '點心',
+    image: 'images/snack/hot-dog.jpg',
+    description: '經典熱狗，懷舊滋味',
+    tags: ['經典'],
+    extras: [
+      { name: '加起司', price: 10 },
+      { name: '加酸菜', price: 5 }
+    ],
+    dippingSauce: ['番茄醬', '黃芥末', '美乃滋', '不加醬']
+  },
+  {
+    id: 'snack-10',
+    name: '炸春捲',
+    price: 30,
+    category: '點心',
+    image: 'images/snack/spring-rolls.jpg',
+    description: '酥脆外皮，香濃內餡',
+    extras: [
+      { name: '加3條', price: 25 }
+    ],
+    dippingSauce: ['甜辣醬', '梅子醬', '不加醬']
+  },
+  {
+    id: 'snack-11',
+    name: '地瓜球',
+    price: 30,
+    category: '點心',
+    image: 'images/snack/sweet-potato-balls.jpg',
+    description: 'Q彈地瓜球，香甜美味',
+    tags: ['人氣'],
+    extras: [
+      { name: '升級大份(+50%)', price: 15 }
+    ],
+    dippingSauce: ['煉乳', '梅子粉', '不加醬']
+  },
+  {
+    id: 'snack-12',
+    name: '銀絲卷',
+    price: 25,
+    category: '點心',
+    image: 'images/snack/steamed-rolls.jpg',
+    description: '鬆軟銀絲卷，古早味',
+    tags: ['經典'],
+    extras: [
+      { name: '加煉乳', price: 5 },
+      { name: '加花生醬', price: 8 }
+    ],
+    servingStyle: ['原味', '炸酥']
   }
 ];
 

@@ -9,6 +9,105 @@ let selectedOptions = {
   ice: null
 };
 
+// 訂單選項
+let orderOptions = {
+  storeId: null,
+  pickupType: 'now',
+  pickupDate: null,
+  pickupTime: null,
+  diningOption: 'takeout'
+};
+
+// 搜尋相關
+let searchQuery = '';
+let currentCategory = '全部';
+let filteredProducts = [];
+
+// ===== 初始化門市選擇 =====
+function initStoreSelect() {
+  const select = document.getElementById('storeSelect');
+  
+  // 填充門市選項
+  stores.forEach(store => {
+    const option = document.createElement('option');
+    option.value = store.id;
+    option.textContent = store.name;
+    select.appendChild(option);
+  });
+  
+  // 檢查是否有已選門市
+  const savedStore = localStorage.getItem('selectedStore');
+  if (savedStore) {
+    try {
+      const store = JSON.parse(savedStore);
+      select.value = store.id;
+      orderOptions.storeId = store.id;
+    } catch (e) {
+      console.error('解析門市資料失敗', e);
+    }
+  }
+  
+  // 監聽變更
+  select.addEventListener('change', (e) => {
+    orderOptions.storeId = e.target.value;
+    if (e.target.value) {
+      const store = stores.find(s => s.id === e.target.value);
+      localStorage.setItem('selectedStore', JSON.stringify(store));
+    }
+  });
+}
+
+// ===== 初始化取餐方式 =====
+function initPickupType() {
+  const pickupType = document.getElementById('pickupType');
+  const scheduleOptions = document.getElementById('scheduleOptions');
+  
+  pickupType.addEventListener('change', (e) => {
+    orderOptions.pickupType = e.target.value;
+    
+    if (e.target.value === 'schedule') {
+      scheduleOptions.style.display = 'block';
+      generateTimeSlots();
+    } else {
+      scheduleOptions.style.display = 'none';
+    }
+  });
+}
+
+// ===== 生成時間選項 =====
+function generateTimeSlots() {
+  const select = document.getElementById('pickupTime');
+  select.innerHTML = '';
+  
+  const startHour = 6;
+  const endHour = 14;
+  
+  for (let hour = startHour; hour < endHour; hour++) {
+    for (let min = 0; min < 60; min += 15) {
+      const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+      const option = document.createElement('option');
+      option.value = time;
+      option.textContent = time;
+      select.appendChild(option);
+    }
+  }
+}
+
+// ===== 監聽用餐方式 =====
+function initDiningOption() {
+  document.getElementById('diningOption').addEventListener('change', (e) => {
+    orderOptions.diningOption = e.target.value;
+  });
+  
+  document.getElementById('pickupDate')?.addEventListener('change', (e) => {
+    orderOptions.pickupDate = e.target.value;
+  });
+  
+  document.getElementById('pickupTime')?.addEventListener('change', (e) => {
+    orderOptions.pickupTime = e.target.value;
+  });
+}
+
 // ===== 導覽列功能 =====
 const navbarToggle = document.getElementById('navbarToggle');
 const navbarMenu = document.getElementById('navbarMenu');
@@ -58,46 +157,151 @@ window.addEventListener('scroll', () => {
   lastScroll = currentScroll;
 });
 
-// ===== 顯示商品列表 =====
-function displayProducts(category = '全部') {
+// ===== 搜尋功能 =====
+function initSearch() {
+  const searchInput = document.getElementById('searchInput');
+  const clearButton = document.getElementById('clearSearch');
+  const searchResultsInfo = document.getElementById('searchResultsInfo');
+  
+  // 搜尋輸入事件（即時搜尋，防抖處理）
+  let searchTimeout;
+  searchInput.addEventListener('input', (e) => {
+    const value = e.target.value.trim();
+    
+    // 顯示/隱藏清除按鈕
+    clearButton.style.display = value ? 'flex' : 'none';
+    
+    // 防抖處理（300ms）
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      searchQuery = value.toLowerCase();
+      filterAndDisplayProducts();
+    }, 300);
+  });
+  
+  // 清除搜尋
+  clearButton.addEventListener('click', () => {
+    searchInput.value = '';
+    searchQuery = '';
+    clearButton.style.display = 'none';
+    filterAndDisplayProducts();
+    searchInput.focus();
+  });
+  
+  // Enter 鍵搜尋
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      filterAndDisplayProducts();
+    }
+  });
+}
+
+// ===== 篩選並顯示商品 =====
+function filterAndDisplayProducts() {
+  const searchResultsInfo = document.getElementById('searchResultsInfo');
+  
+  // 根據分類篩選
+  let categoryFiltered = products;
+  if (currentCategory !== '全部') {
+    categoryFiltered = products.filter(p => p.category === currentCategory);
+  }
+  
+  // 根據搜尋關鍵字篩選
+  if (searchQuery) {
+    filteredProducts = categoryFiltered.filter(product => {
+      const nameMatch = product.name.toLowerCase().includes(searchQuery);
+      const descMatch = product.description.toLowerCase().includes(searchQuery);
+      const categoryMatch = product.category.toLowerCase().includes(searchQuery);
+      
+      // 檢查標籤
+      const tagsMatch = product.tags && product.tags.some(tag => 
+        tag.toLowerCase().includes(searchQuery)
+      );
+      
+      return nameMatch || descMatch || categoryMatch || tagsMatch;
+    });
+    
+    // 顯示搜尋結果資訊
+    if (filteredProducts.length > 0) {
+      searchResultsInfo.textContent = `找到 ${filteredProducts.length} 項商品`;
+      searchResultsInfo.className = 'search-results-info';
+    } else {
+      searchResultsInfo.textContent = `找不到「${searchQuery}」相關商品，請嘗試其他關鍵字`;
+      searchResultsInfo.className = 'search-results-info no-results';
+    }
+  } else {
+    filteredProducts = categoryFiltered;
+    searchResultsInfo.textContent = '';
+  }
+  
+  // 顯示商品（傳入篩選後的商品）
+  displayProductsFromArray(filteredProducts);
+}
+
+// ===== 顯示商品列表（從陣列） =====
+function displayProductsFromArray(productsArray) {
   const menuGrid = document.getElementById('menuGrid');
   
-  let filteredProducts = category === '全部' 
-    ? products 
-    : products.filter(p => p.category === category);
-  
-  if (filteredProducts.length === 0) {
+  if (productsArray.length === 0) {
     menuGrid.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">🔍</div>
-        <h3>目前此分類沒有商品</h3>
-        <p>請選擇其他分類查看</p>
+        <h3>找不到相關商品</h3>
+        <p>請嘗試其他關鍵字或選擇其他分類</p>
       </div>
     `;
     return;
   }
   
-  menuGrid.innerHTML = filteredProducts.map(product => `
-    <div class="menu-card fade-in" data-product-id="${product.id}">
-      <div class="menu-image-wrapper">
-        <img src="${product.image}" alt="${product.name}" class="menu-image">
-        <span class="menu-category-badge">${product.category}</span>
-      </div>
-      <div class="menu-content">
-        <h3 class="menu-name">${product.name}</h3>
-        <p class="menu-description">${product.description}</p>
-        <div class="menu-price-section">
-          <div>
-            <div class="menu-price">$${product.price}</div>
-            <div class="menu-price-label">起</div>
-          </div>
+  menuGrid.innerHTML = productsArray.map(product => {
+    // 產生標籤 HTML
+    const tagsHTML = product.tags && product.tags.length > 0
+      ? `<div class="menu-tags">
+          ${product.tags.map(tag => `<span class="menu-tag">${tag}</span>`).join('')}
+         </div>`
+      : '';
+    
+    return `
+      <div class="menu-card fade-in" data-product-id="${product.id}">
+        <div class="menu-image-wrapper">
+          <img src="${product.image}" alt="${product.name}" class="menu-image" onerror="this.src='images/placeholder.jpg'">
+          <span class="menu-category-badge">${product.category}</span>
         </div>
-        <button class="menu-add-btn" onclick="openProductModal('${product.id}')">
-          🛒 選購
-        </button>
+        <div class="menu-content">
+          ${tagsHTML}
+          <h3 class="menu-name">${product.name}</h3>
+          <p class="menu-description">${product.description}</p>
+          <div class="menu-price-section">
+            <div>
+              <div class="menu-price">$${product.price}</div>
+              <div class="menu-price-label">起</div>
+            </div>
+          </div>
+          <button class="menu-add-btn" onclick="openProductModal('${product.id}')">
+            🛒 選購
+          </button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+// ===== 顯示商品列表 =====
+function displayProducts(category = '全部') {
+  currentCategory = category;
+  searchQuery = ''; // 重置搜尋
+  
+  // 清除搜尋框
+  const searchInput = document.getElementById('searchInput');
+  const clearButton = document.getElementById('clearSearch');
+  const searchResultsInfo = document.getElementById('searchResultsInfo');
+  
+  if (searchInput) searchInput.value = '';
+  if (clearButton) clearButton.style.display = 'none';
+  if (searchResultsInfo) searchResultsInfo.textContent = '';
+  
+  filterAndDisplayProducts();
 }
 
 // ===== 分類篩選功能 =====
@@ -299,6 +503,12 @@ document.getElementById('modalOptions').addEventListener('change', (e) => {
 document.getElementById('addToCartBtn').addEventListener('click', () => {
   if (!currentProduct) return;
   
+  // 檢查是否選擇門市
+  if (!orderOptions.storeId) {
+    alert('請先選擇門市！');
+    return;
+  }
+  
   // 準備購物車項目
   const cartItem = {
     id: currentProduct.id,
@@ -338,6 +548,9 @@ document.getElementById('addToCartBtn').addEventListener('click', () => {
   
   // 儲存購物車
   localStorage.setItem('cart', JSON.stringify(cart));
+  
+  // 儲存訂單選項
+  localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
   
   // 更新徽章
   updateCartBadge();
@@ -387,6 +600,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   displayProducts();
   setupCategoryFilter();
+  initStoreSelect();
+  initPickupType();
+  initDiningOption();
+  initSearch(); // 初始化搜尋功能
   
   // 設定當前頁面的導覽連結為 active
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';

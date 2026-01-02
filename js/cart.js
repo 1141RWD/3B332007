@@ -1,4 +1,4 @@
-a// 購物車頁面 JavaScript
+// 購物車頁面 JavaScript
 
 // ===== 導覽列功能 =====
 const navbarToggle = document.getElementById('navbarToggle');
@@ -168,6 +168,33 @@ function renderCart() {
           <h2 class="cart-title">購物清單 (${cart.length} 項商品)</h2>
           <button class="clear-cart-btn" onclick="clearCart()">🗑️ 清空購物車</button>
         </div>
+        
+        ${(() => {
+          const orderOptions = JSON.parse(localStorage.getItem('orderOptions')) || {};
+          const selectedStore = orderOptions.storeId ? stores.find(s => s.id === orderOptions.storeId) : null;
+          
+          if (selectedStore) {
+            return `
+              <div style="background: var(--soft-peach); padding: var(--spacing-md); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md);">
+                <h3 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: var(--spacing-sm);">📋 訂單資訊</h3>
+                <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-dark);">
+                  <div>🏪 門市：${selectedStore.name.replace('晨光早餐店 - ', '')}</div>
+                  <div>🕒 取餐方式：${orderOptions.pickupType === 'now' ? '立即取餐' : '預約取餐'}</div>
+                  ${orderOptions.pickupType === 'schedule' ? `
+                    <div>⏰ 預約時間：${orderOptions.pickupDate === 'today' ? '今天' : '明天'} ${orderOptions.pickupTime}</div>
+                  ` : ''}
+                  <div>🍽️ 用餐方式：${orderOptions.diningOption === 'takeout' ? '📦 外帶' : '🍽️ 內用'}</div>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div style="background: var(--primary-yellow); color: var(--white); padding: var(--spacing-md); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md); text-align: center; font-weight: 700;">
+                ⚠️ 請先在<a href="menu.html" style="color: var(--white); text-decoration: underline;">點餐頁面</a>選擇門市
+              </div>
+            `;
+          }
+        })()}
         
         <div class="cart-items">
           ${cart.map((item, index) => renderCartItem(item, index)).join('')}
