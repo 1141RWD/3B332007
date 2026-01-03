@@ -10,6 +10,9 @@
   <title>會員中心 - 晨光早餐店</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
   <style>
     /* 會員中心專屬樣式 */
     
@@ -354,7 +357,7 @@
         <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
         <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
         <li><a href="profile.html" class="navbar-link active">👤 會員中心</a></li>
-        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+        <li><div id="loginBtn" class="navbar-link"><a href="login.html">🔐 登入 / 註冊</a></div></li>
         <li>
           <a href="cart.html" class="navbar-link cart-link">
             🛒 購物車
@@ -370,6 +373,11 @@
     <div id="profileContent">
       <!-- 由 JavaScript 動態生成 -->
     </div>
+    <!-- 客服專區 -->
+    <section id="contactSection" class="profile-section active" style="margin-top: 2rem;">
+      <!-- 客服專區內容將由 JS 動態生成 -->
+    </section>
+
   </main>
 
   <!-- 頁尾 -->
@@ -439,6 +447,8 @@
   </footer>
 
   <!-- JavaScript -->
+  <script src="js/contact-system.js"></script>
+  <script src="js/profile-contact.js"></script>
   <script src="js/profile.js"></script>
 </body>
 </html>

@@ -144,24 +144,24 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
   
   if (hasError) return;
   
-  // 取得所有使用者
-  const users = JSON.parse(localStorage.getItem('users')) || [];
+  // 使用 auth.js 的驗證函數
+  const result = authenticateUser(email, password);
   
-  // 尋找匹配的使用者
-  const user = users.find(u => u.email === email && u.password === password);
-  
-  if (user) {
+  if (result.success) {
     // 登入成功
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    
-    // 檢查是否有需要跳轉的頁面（從購物車結帳過來的）
     const redirectTo = localStorage.getItem('redirectAfterLogin');
     localStorage.removeItem('redirectAfterLogin');
     
-    alert('登入成功！歡迎回來，' + user.name + '！');
-    location.href = redirectTo || 'profile.html';
+    alert('登入成功！歡迎回來，' + result.user.name + '！');
+    
+    // 根據角色導向不同頁面
+    if (result.role === 'admin') {
+      location.href = redirectTo || 'admin.html';
+    } else {
+      location.href = redirectTo || 'profile.html';
+    }
   } else {
-    showError('loginPassword', 'loginPasswordError', '電子郵件或密碼錯誤');
+    showError('loginPassword', 'loginPasswordError', result.message || '電子郵件或密碼錯誤');
   }
 });
 

@@ -1,378 +1,354 @@
-// 購物車頁面 JavaScript
-
-// ===== 導覽列功能 =====
-const navbarToggle = document.getElementById('navbarToggle');
-const navbarMenu = document.getElementById('navbarMenu');
-
-if (navbarToggle) {
-  navbarToggle.addEventListener('click', () => {
-    navbarToggle.classList.toggle('active');
-    navbarMenu.classList.toggle('active');
-  });
-}
-
-const navbarLinks = document.querySelectorAll('.navbar-link');
-navbarLinks.forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 768) {
-      navbarToggle.classList.remove('active');
-      navbarMenu.classList.remove('active');
-    }
-  });
-});
-
-// ===== 更新購物車徽章 =====
-function updateCartBadge() {
-  const cart = getCart();
-  const cartBadge = document.getElementById('cartBadge');
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購物車 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
   
-  if (cartBadge) {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartBadge.textContent = totalItems;
-    cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
-  }
-}
-
-// ===== 滾動效果 =====
-let lastScroll = 0;
-const navbar = document.getElementById('navbar');
-
-window.addEventListener('scroll', () => {
-  const currentScroll = window.pageYOffset;
+  <!-- 必須按順序載入 -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shop.js"></script>
   
-  if (currentScroll > 100) {
-    navbar.style.boxShadow = '0 4px 20px rgba(255, 107, 53, 0.2)';
-  } else {
-    navbar.style.boxShadow = '0 4px 16px rgba(255, 107, 53, 0.15)';
-  }
-  
-  lastScroll = currentScroll;
-});
-
-// ===== localStorage 工具函數 =====
-function getCart() {
-  return JSON.parse(localStorage.getItem('cart')) || [];
-}
-
-function saveCart(cart) {
-  localStorage.setItem('cart', JSON.stringify(cart));
-  updateCartBadge();
-  renderCart();
-}
-
-// ===== 計算小計 =====
-function calculateItemTotal(item) {
-  let total = item.price * item.quantity;
-  
-  // 加上加購項目的價格
-  if (item.options && item.options.extras && item.options.extras.length > 0) {
-    item.options.extras.forEach(extra => {
-      total += extra.price * item.quantity;
-    });
-  }
-  
-  return total;
-}
-
-// ===== 計算訂單總計 =====
-function calculateOrderTotal() {
-  const cart = getCart();
-  const subtotal = cart.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-  
-  // 外送費計算
-  let deliveryFee = 0;
-  if (subtotal > 0 && subtotal < storeInfo.delivery.freeDeliveryOver) {
-    deliveryFee = storeInfo.delivery.fee;
-  }
-  
-  const total = subtotal + deliveryFee;
-  
-  return { subtotal, deliveryFee, total };
-}
-
-// ===== 更新商品數量 =====
-function updateQuantity(index, change) {
-  const cart = getCart();
-  
-  if (cart[index]) {
-    cart[index].quantity += change;
-    
-    // 如果數量小於 1，移除商品
-    if (cart[index].quantity < 1) {
-      removeItem(index);
-      return;
+  <style>
+    .cart-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      min-height: calc(100vh - 80px);
     }
     
-    saveCart(cart);
-  }
-}
-
-// ===== 移除商品 =====
-function removeItem(index) {
-  const cart = getCart();
-  cart.splice(index, 1);
-  saveCart(cart);
-  showMessage('商品已移除');
-}
-
-// ===== 清空購物車 =====
-function clearCart() {
-  if (confirm('確定要清空購物車嗎？')) {
-    localStorage.removeItem('cart');
-    updateCartBadge();
-    renderCart();
-    showMessage('購物車已清空');
-  }
-}
-
-// ===== 顯示訊息 =====
-function showMessage(message) {
-  const messageEl = document.getElementById('successMessage');
-  messageEl.textContent = message;
-  messageEl.classList.add('show');
-  
-  setTimeout(() => {
-    messageEl.classList.remove('show');
-  }, 2000);
-}
-
-// ===== 渲染購物車 =====
-function renderCart() {
-  const cart = getCart();
-  const cartContent = document.getElementById('cartContent');
-  
-  // 如果購物車為空
-  if (cart.length === 0) {
-    cartContent.innerHTML = `
-      <div class="empty-cart fade-in">
-        <div class="empty-cart-icon">🛒</div>
-        <h2 class="empty-cart-title">購物車是空的</h2>
-        <p class="empty-cart-text">
-          還沒有選購商品嗎？快去看看我們的美味早餐吧！
-        </p>
-        <a href="menu.html" class="btn btn-primary">開始點餐</a>
-      </div>
-    `;
-    return;
-  }
-  
-  // 計算總計
-  const { subtotal, deliveryFee, total } = calculateOrderTotal();
-  
-  // 渲染購物車項目
-  cartContent.innerHTML = `
-    <div class="cart-container">
-      <!-- 購物車項目列表 -->
-      <div class="cart-items-section fade-in">
-        <div class="cart-header">
-          <h2 class="cart-title">購物清單 (${cart.length} 項商品)</h2>
-          <button class="clear-cart-btn" onclick="clearCart()">🗑️ 清空購物車</button>
-        </div>
-        
-        ${(() => {
-          const orderOptions = JSON.parse(localStorage.getItem('orderOptions')) || {};
-          const selectedStore = orderOptions.storeId ? stores.find(s => s.id === orderOptions.storeId) : null;
-          
-          if (selectedStore) {
-            return `
-              <div style="background: var(--soft-peach); padding: var(--spacing-md); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md);">
-                <h3 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: var(--spacing-sm);">📋 訂單資訊</h3>
-                <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-dark);">
-                  <div>🏪 門市：${selectedStore.name.replace('晨光早餐店 - ', '')}</div>
-                  <div>🕒 取餐方式：${orderOptions.pickupType === 'now' ? '立即取餐' : '預約取餐'}</div>
-                  ${orderOptions.pickupType === 'schedule' ? `
-                    <div>⏰ 預約時間：${orderOptions.pickupDate === 'today' ? '今天' : '明天'} ${orderOptions.pickupTime}</div>
-                  ` : ''}
-                  <div>🍽️ 用餐方式：${orderOptions.diningOption === 'takeout' ? '📦 外帶' : '🍽️ 內用'}</div>
-                </div>
-              </div>
-            `;
-          } else {
-            return `
-              <div style="background: var(--primary-yellow); color: var(--white); padding: var(--spacing-md); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md); text-align: center; font-weight: 700;">
-                ⚠️ 請先在<a href="menu.html" style="color: var(--white); text-decoration: underline;">點餐頁面</a>選擇門市
-              </div>
-            `;
-          }
-        })()}
-        
-        <div class="cart-items">
-          ${cart.map((item, index) => renderCartItem(item, index)).join('')}
-        </div>
-      </div>
+    .cart-header {
+      margin-bottom: 2rem;
+    }
+    
+    .cart-header h1 {
+      font-size: 2rem;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .cart-content {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+    }
+    
+    .cart-items-section {
+      background: var(--soft-peach);
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+    }
+    
+    .empty-cart {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    
+    .empty-cart-icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .empty-cart h2 {
+      font-size: 1.5rem;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+    }
+    
+    .empty-cart p {
+      color: var(--dark-gray);
+      margin-bottom: 2rem;
+    }
+    
+    .go-shopping-btn {
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: var(--transition-base);
+    }
+    
+    .go-shopping-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+    
+    .cart-summary {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    
+    .summary-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .coupon-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .coupon-section label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .coupon-select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      cursor: pointer;
+      background: white;
+    }
+    
+    .discount-info {
+      background: #E8F5E9;
+      border: 2px solid #4CAF50;
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .discount-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+    
+    .discount-row.total {
+      color: #2E7D32;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: var(--text-dark);
+    }
+    
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 2px solid var(--medium-gray);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary-orange);
+      margin-bottom: 1.5rem;
+    }
+    
+    .checkout-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      color: white;
+      padding: 1.2rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+    
+    .checkout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+    
+    .continue-shopping {
+      display: block;
+      text-align: center;
+      color: var(--primary-orange);
+      text-decoration: none;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    
+    .continue-shopping:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .cart-content {
+        grid-template-columns: 1fr;
+      }
       
-      <!-- 訂單摘要 -->
-      <div class="order-summary fade-in">
-        <h3 class="summary-title">訂單摘要</h3>
-        
-        <div class="summary-row">
-          <span class="summary-label">商品小計</span>
-          <span class="summary-value">$${subtotal}</span>
+      .cart-summary {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 導覽列 -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">
+        <span class="brand-icon">☀️</span>
+        <span class="brand-text">晨光早餐店</span>
+      </a>
+      
+      <ul class="navbar-menu">
+        <li><a href="index.html">首頁</a></li>
+        <li><a href="menu.html">線上點餐</a></li>
+        <li><a href="stores.html">門市查詢</a></li>
+        <li><a href="contact.html">聯絡我們</a></li>
+        <li><a href="cart.html" class="active">🛒 購物車</a></li>
+        <li id="loginBtn" style="margin-left: auto;">
+          <a href="login.html">🔐 登入 / 註冊</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 購物車內容 -->
+  <div class="cart-container">
+    <div class="cart-header">
+      <h1>🛒 購物車</h1>
+      <p style="color: var(--dark-gray);">您的購物清單</p>
+    </div>
+
+    <div class="cart-content">
+      <!-- 購物車商品區 -->
+      <div class="cart-items-section">
+        <!-- 空購物車訊息 -->
+        <div id="emptyCart" class="empty-cart" style="display: none;">
+          <div class="empty-cart-icon">🛒</div>
+          <h2>您的購物車是空的</h2>
+          <p>快去挑選美味的早餐吧！</p>
+          <a href="menu.html" class="go-shopping-btn">🍳 開始點餐</a>
         </div>
-        
-        <div class="summary-row">
-          <span class="summary-label">外送費</span>
-          <span class="summary-value">${deliveryFee > 0 ? '$' + deliveryFee : '免費'}</span>
+
+        <!-- 購物車商品列表 -->
+        <div id="cartItems"></div>
+      </div>
+
+      <!-- 結帳摘要區 -->
+      <div id="cartSummary" class="cart-summary" style="display: none;">
+        <h2 class="summary-title">💰 結帳摘要</h2>
+
+        <!-- 折價券選擇 -->
+        <div class="coupon-section">
+          <label for="couponSelect">🎫 選擇折價券</label>
+          <select id="couponSelect" class="coupon-select" onchange="window.calculateTotal()">
+            <option value="">載入中...</option>
+          </select>
         </div>
-        
-        ${subtotal > 0 && subtotal < storeInfo.delivery.freeDeliveryOver ? `
-          <div class="delivery-note">
-            💡 再消費 $${storeInfo.delivery.freeDeliveryOver - subtotal} 即可享免運費
+
+        <!-- 折扣資訊（使用折價券時顯示）-->
+        <div id="discountInfo" class="discount-info" style="display: none;">
+          <div class="discount-row">
+            <span>原價</span>
+            <span id="originalPrice">$0</span>
           </div>
-        ` : subtotal >= storeInfo.delivery.freeDeliveryOver ? `
-          <div class="delivery-note">
-            ✓ 已達免運門檻，享免費外送
+          <div class="discount-row total">
+            <span>💰 折扣</span>
+            <span id="discountAmount">-$0</span>
           </div>
-        ` : ''}
-        
-        <div class="summary-divider"></div>
-        
+        </div>
+
+        <!-- 金額明細 -->
+        <div class="summary-row">
+          <span>小計</span>
+          <span id="cartSubtotal">$0</span>
+        </div>
+        <div class="summary-row">
+          <span>運費</span>
+          <span id="cartShipping">$0</span>
+        </div>
+
+        <!-- 總計 -->
         <div class="summary-total">
           <span>總計</span>
-          <span>$${total}</span>
+          <span id="cartTotal">$0</span>
         </div>
-        
-        <button class="checkout-btn" onclick="checkout()" ${subtotal < storeInfo.delivery.minOrder ? 'disabled' : ''}>
-          ${subtotal < storeInfo.delivery.minOrder 
-            ? `最低消費 $${storeInfo.delivery.minOrder}` 
-            : '💳 前往結帳'}
+
+        <!-- 結帳按鈕 -->
+        <button onclick="window.checkout()" class="checkout-btn">
+          🛒 確認結帳
         </button>
-        
-        <button class="continue-shopping-btn" onclick="location.href='menu.html'">
+
+        <a href="menu.html" class="continue-shopping">
           ← 繼續購物
-        </button>
+        </a>
       </div>
     </div>
-  `;
-}
+  </div>
 
-// ===== 渲染單個購物車項目 =====
-function renderCartItem(item, index) {
-  const itemTotal = calculateItemTotal(item);
-  
-  // 格式化選項顯示
-  let optionsHTML = '';
-  
-  if (item.options) {
-    // 加購項目
-    if (item.options.extras && item.options.extras.length > 0) {
-      optionsHTML += `
-        <span class="cart-item-option">
-          🍳 加購：${item.options.extras.map(e => e.name).join('、')}
-        </span>
-      `;
-    }
-    
-    // 飲料選項
-    if (item.options.sweetness) {
-      optionsHTML += `
-        <span class="cart-item-option">
-          🍯 甜度：${item.options.sweetness}
-        </span>
-      `;
-    }
-    
-    if (item.options.ice) {
-      optionsHTML += `
-        <span class="cart-item-option">
-          🧊 冰塊：${item.options.ice}
-        </span>
-      `;
-    }
-  }
-  
-  return `
-    <div class="cart-item">
-      <img src="${item.image}" alt="${item.name}" class="cart-item-image">
-      
-      <div class="cart-item-info">
-        <div>
-          <h3 class="cart-item-name">${item.name}</h3>
-          <span class="cart-item-category">${item.category}</span>
-        </div>
-        
-        ${optionsHTML ? `
-          <div class="cart-item-options">
-            ${optionsHTML}
-          </div>
-        ` : ''}
+  <!-- 頁尾 -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>關於我們</h3>
+        <p>晨光早餐店提供新鮮美味的早餐，讓您的每一天都充滿活力！</p>
       </div>
-      
-      <div class="cart-item-controls">
-        <div class="cart-item-price">$${itemTotal}</div>
-        
-        <div class="cart-item-quantity">
-          <button class="qty-btn" onclick="updateQuantity(${index}, -1)">−</button>
-          <span class="qty-value">${item.quantity}</span>
-          <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
-        </div>
-        
-        <button class="remove-item-btn" onclick="removeItem(${index})">
-          🗑️ 移除
-        </button>
+      <div class="footer-section">
+        <h3>快速連結</h3>
+        <ul>
+          <li><a href="index.html">首頁</a></li>
+          <li><a href="menu.html">線上點餐</a></li>
+          <li><a href="stores.html">門市查詢</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>聯絡資訊</h3>
+        <p>📞 電話：(04) 1234-5678</p>
+        <p>📧 Email: info@morning-glory.com</p>
       </div>
     </div>
-  `;
-}
+    <div class="footer-bottom">
+      <p>&copy; 2025 晨光早餐店 Morning Glory. All rights reserved.</p>
+    </div>
+  </footer>
 
-// ===== 結帳功能 =====
-function checkout() {
-  const cart = getCart();
-  const { total } = calculateOrderTotal();
-  
-  if (cart.length === 0) {
-    alert('購物車是空的！');
-    return;
-  }
-  
-  // 檢查是否已登入
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  
-  if (!currentUser) {
-    if (confirm('請先登入才能結帳。是否前往登入頁面？')) {
-      // 儲存當前頁面，登入後返回
-      localStorage.setItem('redirectAfterLogin', 'cart.html');
-      location.href = 'login.html';
-    }
-    return;
-  }
-  
-  // 建立訂單
-  const order = {
-    id: 'ORDER-' + Date.now(),
-    userId: currentUser.email,
-    items: cart,
-    total: total,
-    status: '處理中',
-    date: new Date().toISOString(),
-    deliveryAddress: currentUser.address || '台中市西區美村路一段123號'
-  };
-  
-  // 儲存訂單到訂單歷史
-  let orders = JSON.parse(localStorage.getItem('orders')) || [];
-  orders.unshift(order); // 加到最前面
-  localStorage.setItem('orders', JSON.stringify(orders));
-  
-  // 清空購物車
-  localStorage.removeItem('cart');
-  updateCartBadge();
-  
-  // 顯示成功訊息並跳轉
-  alert(`訂單建立成功！\n訂單編號：${order.id}\n總金額：$${total}\n\n感謝您的訂購，我們將盡快為您準備餐點！`);
-  location.href = 'profile.html';
-}
-
-// ===== 頁面載入時執行 =====
-document.addEventListener('DOMContentLoaded', () => {
-  updateCartBadge();
-  renderCart();
-  
-  // 設定當前頁面的導覽連結為 active
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  navbarLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === currentPage) {
-      link.classList.add('active');
-    }
-  });
-});
+  <!-- 初始化購物車頁面 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 Cart.html 頁面載入');
+      
+      // 渲染購物車項目
+      if (typeof window.renderCartItems === 'function') {
+        window.renderCartItems();
+      } else {
+        console.error('❌ renderCartItems 函數未定義');
+      }
+      
+      // 載入可用折價券
+      if (typeof window.loadAvailableCoupons === 'function') {
+        window.loadAvailableCoupons();
+      } else {
+        console.warn('⚠️ loadAvailableCoupons 函數未定義');
+      }
+    });
+  </script>
+</body>
+</html>

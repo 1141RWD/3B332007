@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理後台 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
+    <script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/coupon-system.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/shop.js"></script>
+  <style>
+    /* 後台專屬樣式 */
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-xl);
+      min-height: calc(100vh - 80px);
+    }
+    
+    .admin-header {
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      color: var(--white);
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .admin-header h1 {
+      margin: 0 0 var(--spacing-sm) 0;
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+    }
+    
+    .admin-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+    
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .stat-card {
+      background: var(--white);
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      transition: var(--transition-base);
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .stat-icon {
+      font-size: 3rem;
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+      margin: var(--spacing-sm) 0;
+      font-family: var(--font-display);
+    }
+    
+    .stat-label {
+      font-size: 1.1rem;
+      color: var(--dark-gray);
+      font-weight: 500;
+    }
+    
+    .admin-tabs {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xl);
+      border-bottom: 2px solid var(--medium-gray);
+      flex-wrap: wrap;
+      overflow-x: auto;
+    }
+    
+    .admin-tab {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--dark-gray);
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+    
+    .admin-tab:hover {
+      color: var(--primary-orange);
+      background: rgba(255, 107, 53, 0.05);
+    }
+    
+    .admin-tab.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+    
+    .admin-panel {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+    
+    .admin-panel.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .admin-panel h2 {
+      font-family: var(--font-display);
+      color: var(--primary-orange);
+      margin-bottom: var(--spacing-lg);
+      font-size: 2rem;
+    }
+    
+    .data-table {
+      width: 100%;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .data-table th {
+      background: var(--soft-peach);
+      padding: var(--spacing-md);
+      text-align: left;
+      font-weight: 700;
+      color: var(--primary-orange);
+      font-size: 1.05rem;
+    }
+    
+    .data-table td {
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--medium-gray);
+      vertical-align: middle;
+    }
+    
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .data-table tr:hover {
+      background: rgba(255, 107, 53, 0.05);
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .status-pending {
+      background: #FFF3E0;
+      color: #E65100;
+    }
+    
+    .status-completed {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    
+    .status-cancelled {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+    
+    .action-btn {
+      padding: 0.5rem 1rem;
+      margin: 0 0.2rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: var(--transition-fast);
+    }
+    
+    .btn-view {
+      background: #2196F3;
+      color: var(--white);
+    }
+    
+    .btn-view:hover {
+      background: #1976D2;
+    }
+    
+    .btn-edit {
+      background: #FF9800;
+      color: var(--white);
+    }
+    
+    .btn-edit:hover {
+      background: #F57C00;
+    }
+    
+    .btn-delete {
+      background: #F44336;
+      color: var(--white);
+    }
+    
+    .btn-delete:hover {
+      background: #D32F2F;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .add-btn {
+      background: #4CAF50;
+      color: var(--white);
+      padding: var(--spacing-md) var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      font-size: 1.1rem;
+    }
+    
+    .add-btn:hover {
+      background: #45A049;
+    }
+    
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: var(--spacing-md);
+      }
+      
+      .admin-header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .stat-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      .admin-tabs {
+        overflow-x: auto;
+      }
+      
+      .data-table {
+        overflow-x: auto;
+      }
+      
+      .data-table table {
+        min-width: 800px;
+      }
+      
+      .action-btn {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 管理員權限檢查 -->
+  <script>
+    // 頁面載入時立即檢查管理員權限
+    (function() {
+      // 先嘗試從 localStorage 載入用戶
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          if (user.role === 'admin') {
+            // 是管理員，允許訪問
+            return;
+          }
+        } catch (e) {
+          console.error('解析用戶資料失敗', e);
+        }
+      }
+      
+      // 不是管理員或未登入
+      alert('您沒有權限訪問此頁面，請使用管理員帳號登入');
+      window.location.href = 'login.html';
+    })();
+  </script>
+  <!-- 導覽列 -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">管理後台</div>
+        </div>
+      </a>
+      
+      <div class="navbar-menu" id="navbarMenu">
+        <a href="index.html" class="navbar-link">🏠 返回首頁</a>
+        <div id="loginBtn" class="navbar-link">
+          <a href="login.html">🔐 登入 / 註冊</a>
+        </div>
+      </div>
+      
+      <button class="navbar-toggle" id="navbarToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 管理後台主要內容 -->
+  <div class="admin-container">
+    <!-- 後台標題 -->
+    <div class="admin-header">
+      <h1>🔧 管理後台</h1>
+      <p>歡迎回來，管理員！這裡是您的控制中心。</p>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value" id="totalOrders">0</div>
+        <div class="stat-label">總訂單數</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="totalMembers">0</div>
+        <div class="stat-label">會員數</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🛍️</div>
+        <div class="stat-value" id="totalProducts">84</div>
+        <div class="stat-label">商品數</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" id="totalMessages">0</div>
+        <div class="stat-label">待回覆訊息</div>
+      </div>
+    </div>
+
+    <!-- 功能分頁 -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchTab('orders')">📦 訂單管理</button>
+      <button class="admin-tab" onclick="switchTab('members')">👥 會員管理</button>
+      <button class="admin-tab" onclick="switchTab('products')">🛍️ 商品管理</button>
+      <button class="admin-tab" onclick="switchTab('messages')">💬 客服訊息</button>
+    </div>
+
+    <!-- 訂單管理面板 -->
+    <div id="ordersPanel" class="admin-panel active">
+      <h2>📦 訂單管理</h2>
+      <div class="data-table" id="ordersTable">
+        <p style="text-align: center; padding: 2rem;">載入中...</p>
+      </div>
+    </div>
+
+    <!-- 會員管理面板 -->
+    <div id="membersPanel" class="admin-panel">
+      <h2>👥 會員管理</h2>
+      <div class="data-table" id="membersTable">
+        <p style="text-align: center; padding: 2rem;">載入中...</p>
+      </div>
+    </div>
+
+    <!-- 商品管理面板 -->
+    <div id="productsPanel" class="admin-panel">
+      <h2>🛍️ 商品管理</h2>
+      <button class="action-btn add-btn" onclick="addNewProduct()">
+        ➕ 新增商品
+      </button>
+      <div class="data-table" id="productsTable">
+        <p style="text-align: center; padding: 2rem;">載入中...</p>
+      </div>
+    </div>
+
+    <!-- 客服訊息面板 -->
+    <div id="messagesPanel" class="admin-panel">
+      <h2>💬 客服訊息管理</h2>
+      <div id="adminContactMessagesPanel">
+        <!-- 客服訊息列表將由 JS 動態生成 -->
+      </div>
+      <h2>💬 客服訊息管理</h2>
+      <div class="data-table" id="messagesTable">
+        <p style="text-align: center; padding: 2rem;">載入中...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/contact-system.js"></script>
+  <script src="js/admin-contact.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

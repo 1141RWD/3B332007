@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>結帳 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
+  <style>
+    .checkout-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 var(--spacing-md);
+    }
+    
+    .checkout-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .checkout-header h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--primary-orange);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .checkout-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-xl);
+      position: relative;
+    }
+    
+    .checkout-steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--medium-gray);
+      z-index: 0;
+    }
+    
+    .step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--medium-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-xs);
+      font-weight: 700;
+      color: var(--dark-gray);
+      transition: var(--transition-fast);
+    }
+    
+    .step.active .step-number {
+      background: var(--primary-orange);
+      border-color: var(--primary-orange);
+      color: var(--white);
+    }
+    
+    .step.completed .step-number {
+      background: var(--success-green);
+      border-color: var(--success-green);
+      color: var(--white);
+    }
+    
+    .step-label {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+    
+    .step.active .step-label {
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+    
+    .checkout-content {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: var(--spacing-xl);
+    }
+    
+    .checkout-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-lg);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 2px solid var(--soft-peach);
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .form-label.required::after {
+      content: ' *';
+      color: var(--accent-red);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-family: var(--font-primary);
+      transition: var(--transition-fast);
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-family: var(--font-primary);
+      background: var(--white);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+    
+    .radio-option {
+      flex: 1;
+      position: relative;
+    }
+    
+    .radio-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .radio-label {
+      display: block;
+      padding: var(--spacing-md);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-md);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .radio-option input[type="radio"]:checked + .radio-label {
+      background: var(--soft-peach);
+      border-color: var(--primary-orange);
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+    
+    .order-summary {
+      position: sticky;
+      top: 100px;
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+    
+    .item-name {
+      flex: 1;
+      font-weight: 500;
+    }
+    
+    .item-price {
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+    
+    .summary-total {
+      background: var(--soft-peach);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-md);
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .total-label {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    .total-amount {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+    }
+    
+    .checkout-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+    
+    .btn-checkout {
+      flex: 1;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+      color: var(--white);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-secondary {
+      background: var(--white);
+      color: var(--primary-orange);
+      border: 2px solid var(--primary-orange);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--soft-peach);
+    }
+    
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+    }
+    
+    .payment-option {
+      padding: var(--spacing-md);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-md);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .payment-option:hover {
+      border-color: var(--primary-orange);
+    }
+    
+    .payment-option.selected {
+      background: var(--soft-peach);
+      border-color: var(--primary-orange);
+    }
+    
+    .payment-icon {
+      font-size: 2rem;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    @media (max-width: 768px) {
+      .checkout-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .order-summary {
+        position: static;
+      }
+      
+      .checkout-steps {
+        flex-direction: column;
+      }
+      
+      .checkout-steps::before {
+        display: none;
+      }
+    }
+  </style>
+    
+    /* 美化結帳頁面 */
+    .checkout-container {
+      max-width: 1000px;
+      background: linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 100%);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 32px rgba(255, 107, 53, 0.15);
+      margin: 2rem auto;
+      padding: var(--spacing-xl);
+    }
+    
+    .checkout-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 3px solid var(--primary-orange);
+    }
+    
+    .checkout-header h1 {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .checkout-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-xl);
+      position: relative;
+      background: var(--white);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .step-number {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-sm);
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+    }
+    
+    .step.completed .step-number {
+      background: linear-gradient(135deg, #4CAF50, #45A049);
+    }
+    
+    .order-summary {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: 0 4px 24px rgba(255, 107, 53, 0.1);
+      border: 2px solid var(--primary-orange);
+    }
+    
+    .order-summary h2 {
+      color: var(--primary-orange);
+      margin-bottom: var(--spacing-lg);
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-md) 0;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-lg) 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-orange);
+      border-top: 3px solid var(--primary-orange);
+      margin-top: var(--spacing-md);
+    }
+    
+    .success-message {
+      background: linear-gradient(135deg, #E8F5E9 0%, #FFFFFF 100%);
+      border: 3px solid #4CAF50;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      box-shadow: 0 8px 32px rgba(76, 175, 80, 0.2);
+    }
+    
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-md);
+      animation: scaleIn 0.5s ease-out;
+    }
+    
+    @keyframes scaleIn {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    .success-message h2 {
+      color: #2E7D32;
+      font-size: 2rem;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .order-number {
+      background: #4CAF50;
+      color: var(--white);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--radius-full);
+      display: inline-block;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      color: var(--white);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-full);
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-base);
+      box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+    }
+    
+    .btn-secondary {
+      background: var(--white);
+      color: var(--primary-orange);
+      border: 2px solid var(--primary-orange);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-full);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--soft-peach);
+    }
+</head>
+<body>
+  <!-- 導覽列 -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-name">晨光早餐店</div>
+          <div class="logo-slogan">Morning Light Breakfast</div>
+        </div>
+      </a>
+      
+      <ul class="navbar-menu">
+        <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
+        <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
+        <li><a href="cart.html" class="navbar-link active">🛒 購物車 <span class="cart-badge" id="cartBadge">0</span></a></li>
+        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 結帳內容 -->
+  <div class="checkout-container">
+    <div class="checkout-header">
+      <h1>🛒 結帳</h1>
+      <p>請確認您的訂單資訊</p>
+    </div>
+
+    <!-- 結帳步驟 -->
+    <div class="checkout-steps">
+      <div class="step completed">
+        <div class="step-number">✓</div>
+        <div class="step-label">購物車</div>
+      </div>
+      <div class="step active">
+        <div class="step-number">2</div>
+        <div class="step-label">填寫資料</div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-label">確認訂單</div>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-label">完成</div>
+      </div>
+    </div>
+
+    <!-- 結帳內容 -->
+    <div class="checkout-content">
+      <!-- 左側：填寫資料 -->
+      <div class="checkout-main">
+        <div class="checkout-section">
+          <h2 class="section-title">📦 取餐資訊</h2>
+          
+          <div class="form-group">
+            <label class="form-label required">用餐方式</label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" name="diningOption" id="takeout" value="takeout" checked onchange="updateDiningOption()">
+                <label class="radio-label" for="takeout">
+                  📦 外帶
+                </label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="diningOption" id="dinein" value="dinein" onchange="updateDiningOption()">
+                <label class="radio-label" for="dinein">
+                  🍽️ 內用
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 外帶選項 -->
+          <div id="takeoutOptions">
+            <div class="form-group">
+              <label class="form-label required">取餐時間</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input type="radio" name="pickupType" id="now" value="now" checked onchange="updatePickupType()">
+                  <label class="radio-label" for="now">立即取餐</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" name="pickupType" id="schedule" value="schedule" onchange="updatePickupType()">
+                  <label class="radio-label" for="schedule">預約取餐</label>
+                </div>
+              </div>
+            </div>
+
+            <div id="scheduleOptions" style="display: none;">
+              <div class="form-group">
+                <label class="form-label">預約日期</label>
+                <select class="form-select" id="pickupDate">
+                  <option value="today">今天</option>
+                  <option value="tomorrow">明天</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">預約時間</label>
+                <select class="form-select" id="pickupTime"></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 內用選項 -->
+          <div id="dineinOptions" style="display: none;">
+            <div class="form-group">
+              <label class="form-label required">桌號</label>
+              <select class="form-select" id="tableNumber">
+                <option value="">請選擇桌號</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="A3">A3</option>
+                <option value="A4">A4</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="B3">B3</option>
+                <option value="B4">B4</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">選擇門市</label>
+            <select class="form-select" id="storeSelect"></select>
+          </div>
+        </div>
+
+        <div class="checkout-section">
+          <h2 class="section-title">👤 聯絡資訊</h2>
+          
+          <div class="form-group">
+            <label class="form-label required">姓名</label>
+            <input type="text" class="form-input" id="customerName" placeholder="請輸入姓名">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">電話</label>
+            <input type="tel" class="form-input" id="customerPhone" placeholder="請輸入手機號碼">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="customerEmail" placeholder="請輸入 Email（選填）">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">備註</label>
+            <textarea class="form-input" id="orderNote" rows="3" placeholder="有什麼特殊需求嗎？（選填）"></textarea>
+          </div>
+        </div>
+
+        <div class="checkout-section">
+          <h2 class="section-title">💳 付款方式</h2>
+          
+          <div class="payment-methods">
+            <div class="payment-option selected" onclick="selectPayment('cash')">
+              <div class="payment-icon">💵</div>
+              <div>現金付款</div>
+            </div>
+            <div class="payment-option" onclick="selectPayment('card')">
+              <div class="payment-icon">💳</div>
+              <div>信用卡</div>
+            </div>
+            <div class="payment-option" onclick="selectPayment('line')">
+              <div class="payment-icon">💬</div>
+              <div>LINE Pay</div>
+            </div>
+            <div class="payment-option" onclick="selectPayment('mobile')">
+              <div class="payment-icon">📱</div>
+              <div>行動支付</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側：訂單摘要 -->
+      <div class="checkout-sidebar">
+        <div class="checkout-section order-summary">
+          <h2 class="section-title">📋 訂單摘要</h2>
+          
+          <div id="orderItems">
+            <!-- 由 JavaScript 動態生成 -->
+          </div>
+
+          <div class="summary-total">
+            <div class="total-row">
+              <span class="total-label">總計</span>
+              <span class="total-amount" id="totalAmount">$0</span>
+            </div>
+          </div>
+
+          <div class="checkout-actions">
+            <button class="btn-checkout btn-secondary" onclick="window.location.href='cart.html'">返回購物車</button>
+            <button class="btn-checkout btn-primary" onclick="submitOrder()">確認結帳</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedPayment = 'cash';
+
+    // 更新購物車徽章
+    function updateCartBadge() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const badge = document.getElementById('cartBadge');
+      if (badge) {
+        badge.textContent = cart.length;
+      }
+    }
+
+    // 更新用餐方式
+    function updateDiningOption() {
+      const takeout = document.getElementById('takeout').checked;
+      const takeoutOptions = document.getElementById('takeoutOptions');
+      const dineinOptions = document.getElementById('dineinOptions');
+      
+      if (takeout) {
+        takeoutOptions.style.display = 'block';
+        dineinOptions.style.display = 'none';
+      } else {
+        takeoutOptions.style.display = 'none';
+        dineinOptions.style.display = 'block';
+      }
+    }
+
+    // 更新取餐時間
+    function updatePickupType() {
+      const schedule = document.getElementById('schedule').checked;
+      const scheduleOptions = document.getElementById('scheduleOptions');
+      
+      scheduleOptions.style.display = schedule ? 'block' : 'none';
+    }
+
+    // 生成時間選項
+    function generateTimeSlots() {
+      const select = document.getElementById('pickupTime');
+      select.innerHTML = '';
+      
+      for (let hour = 6; hour <= 14; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          const option = document.createElement('option');
+          option.value = timeStr;
+          option.textContent = timeStr;
+          select.appendChild(option);
+        }
+      }
+    }
+
+    // 填充門市選項
+    function populateStores() {
+      const select = document.getElementById('storeSelect');
+      stores.forEach(store => {
+        const option = document.createElement('option');
+        option.value = store.id;
+        option.textContent = `${store.name} - ${store.address}`;
+        select.appendChild(option);
+      });
+    }
+
+    // 顯示訂單商品
+    function displayOrderItems() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const container = document.getElementById('orderItems');
+      const totalElement = document.getElementById('totalAmount');
+      
+      let total = 0;
+      
+      container.innerHTML = cart.map(item => {
+        let itemTotal = item.price * item.quantity;
+        
+        if (item.options && item.options.extras) {
+          item.options.extras.forEach(extra => {
+            itemTotal += extra.price * item.quantity;
+          });
+        }
+        
+        total += itemTotal;
+        
+        return `
+          <div class="summary-item">
+            <div class="item-name">
+              ${item.name} x${item.quantity}
+              ${item.options && item.options.extras && item.options.extras.length > 0 
+                ? `<div style="font-size: 0.85rem; color: var(--dark-gray); margin-top: 0.25rem;">
+                     ${item.options.extras.map(e => e.name).join(', ')}
+                   </div>` 
+                : ''}
+            </div>
+            <div class="item-price">$${itemTotal}</div>
+          </div>
+        `;
+      }).join('');
+      
+      totalElement.textContent = `$${total}`;
+    }
+
+    // 選擇付款方式
+    function selectPayment(method) {
+      selectedPayment = method;
+      
+      document.querySelectorAll('.payment-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      event.currentTarget.classList.add('selected');
+    }
+
+    // 提交訂單
+    function submitOrder() {
+      const diningOption = document.querySelector('input[name="diningOption"]:checked').value;
+      const name = document.getElementById('customerName').value;
+      const phone = document.getElementById('customerPhone').value;
+      const storeId = document.getElementById('storeSelect').value;
+      
+      // 驗證必填欄位
+      if (!name || !phone || !storeId) {
+        alert('請填寫所有必填欄位！');
+        return;
+      }
+      
+      // 內用需要桌號
+      if (diningOption === 'dinein') {
+        const tableNumber = document.getElementById('tableNumber').value;
+        if (!tableNumber) {
+          alert('請選擇桌號！');
+          return;
+        }
+      }
+      
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      
+      if (cart.length === 0) {
+        alert('購物車是空的！');
+        return;
+      }
+      
+      // 建立訂單
+      const order = {
+        id: 'ORDER-' + Date.now(),
+        status: 'pending',
+        items: cart,
+        customer: {
+          name: name,
+          phone: phone,
+          email: document.getElementById('customerEmail').value
+        },
+        diningOption: diningOption,
+        storeId: storeId,
+        payment: selectedPayment,
+        note: document.getElementById('orderNote').value,
+        createdAt: new Date().toISOString(),
+        total: parseInt(document.getElementById('totalAmount').textContent.replace('$', ''))
+      };
+      
+      // 加入桌號或取餐時間
+      if (diningOption === 'dinein') {
+        order.tableNumber = document.getElementById('tableNumber').value;
+      } else {
+        const pickupType = document.querySelector('input[name="pickupType"]:checked').value;
+        order.pickupType = pickupType;
+        
+        if (pickupType === 'schedule') {
+          order.pickupDate = document.getElementById('pickupDate').value;
+          order.pickupTime = document.getElementById('pickupTime').value;
+        }
+      }
+      
+      // 儲存訂單
+      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      orders.push(order);
+      localStorage.setItem('orders', JSON.stringify(orders));
+      
+      // 清空購物車
+      localStorage.removeItem('cart');
+      
+      // 導向成功頁面
+      alert('訂單已送出！訂單編號：' + order.id);
+      window.location.href = 'profile.html';
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCartBadge();
+      generateTimeSlots();
+      populateStores();
+      displayOrderItems();
+    });
+  </script>
+</body>
+</html>

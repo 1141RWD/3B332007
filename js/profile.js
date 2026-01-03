@@ -354,3 +354,78 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ===== 顯示聯絡我們對話記錄 =====
+function displayContactMessages() {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return;
+  
+  const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+  const userMessages = messages.filter(m => m.userEmail === currentUser.email);
+  
+  // 在頁面上創建聯絡記錄區塊（如果還沒有的話）
+  let contactSection = document.getElementById('contactMessagesSection');
+  
+  if (!contactSection && userMessages.length > 0) {
+    // 創建區塊
+    const container = document.querySelector('.profile-container');
+    if (container) {
+      contactSection = document.createElement('div');
+      contactSection.id = 'contactMessagesSection';
+      contactSection.className = 'profile-section active';
+      contactSection.style.marginTop = '2rem';
+      contactSection.innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title-main">💬 我的聯絡記錄</h2>
+        </div>
+        <div id="contactMessagesList"></div>
+      `;
+      container.appendChild(contactSection);
+    }
+  }
+  
+  const messagesList = document.getElementById('contactMessagesList');
+  if (!messagesList) return;
+  
+  if (userMessages.length === 0) {
+    messagesList.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: var(--dark-gray);">
+        <p>您還沒有任何聯絡記錄</p>
+        <a href="contact.html" style="color: var(--primary-orange); text-decoration: underline;">前往聯絡我們</a>
+      </div>
+    `;
+    return;
+  }
+  
+  messagesList.innerHTML = userMessages.map(msg => `
+    <div style="background: var(--white); border-radius: var(--radius-md); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); box-shadow: var(--shadow-sm); border-left: 4px solid ${msg.status === 'replied' ? '#4CAF50' : '#FF9800'};">
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-sm);">
+        <div>
+          <h3 style="margin: 0 0 var(--spacing-xs) 0; color: var(--text-dark);">${msg.subject}</h3>
+          <small style="color: var(--dark-gray);">${new Date(msg.createdAt).toLocaleString('zh-TW')}</small>
+        </div>
+        <span style="background: ${msg.status === 'replied' ? '#4CAF50' : '#FF9800'}; color: var(--white); padding: 0.3rem 0.8rem; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 600;">
+          ${msg.status === 'replied' ? '✅ 已回覆' : '⏳ 待回覆'}
+        </span>
+      </div>
+      <div style="background: var(--soft-peach); padding: var(--spacing-md); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md);">
+        <strong style="color: var(--primary-orange); display: block; margin-bottom: var(--spacing-xs);">您的訊息：</strong>
+        <p style="margin: 0; color: var(--text-dark);">${msg.message}</p>
+      </div>
+      ${msg.status === 'replied' ? `
+        <div style="background: #E8F5E9; padding: var(--spacing-md); border-radius: var(--radius-sm);">
+          <strong style="color: #2E7D32; display: block; margin-bottom: var(--spacing-xs);">客服回覆：</strong>
+          <p style="margin: 0 0 var(--spacing-xs) 0; color: var(--text-dark);">${msg.reply}</p>
+          <small style="color: #2E7D32;">回覆時間：${new Date(msg.repliedAt).toLocaleString('zh-TW')}</small>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// 頁面載入時顯示聯絡記錄
+if (typeof displayContactMessages === 'function') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(displayContactMessages, 500);
+  });
+}

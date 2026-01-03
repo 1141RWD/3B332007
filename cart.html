@@ -3,495 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="晨光早餐店購物車 - 查看您的訂單並完成結帳">
-  <meta name="keywords" content="購物車, 結帳, 早餐訂單">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌅</text></svg>">
   <title>購物車 - 晨光早餐店</title>
+  
+  <!-- 樣式表 -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cart.css">
+  
+  <!-- JavaScript 檔案 -->
   <script src="js/data.js"></script>
-  <style>
-    /* 購物車專屬樣式 */
-    
-    .cart-container {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: var(--spacing-xl);
-      align-items: start;
-    }
-    
-    /* 購物車項目列表 */
-    .cart-items-section {
-      background: var(--white);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-lg);
-      box-shadow: var(--shadow-md);
-    }
-    
-    .cart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--spacing-lg);
-      padding-bottom: var(--spacing-md);
-      border-bottom: 2px solid var(--light-gray);
-    }
-    
-    .cart-title {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text-dark);
-    }
-    
-    .clear-cart-btn {
-      background: var(--accent-red);
-      color: var(--white);
-      border: none;
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-    
-    .clear-cart-btn:hover {
-      background: #d94843;
-      transform: scale(1.05);
-    }
-    
-    .cart-item {
-      display: grid;
-      grid-template-columns: 120px 1fr auto;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-      background: var(--light-gray);
-      border-radius: var(--radius-sm);
-      transition: var(--transition-fast);
-    }
-    
-    .cart-item:hover {
-      background: var(--soft-peach);
-      transform: translateX(5px);
-    }
-    
-    .cart-item-image {
-      width: 120px;
-      height: 90px;
-      object-fit: cover;
-      border-radius: var(--radius-sm);
-    }
-    
-    .cart-item-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    
-    .cart-item-name {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 0.3rem;
-    }
-    
-    .cart-item-category {
-      display: inline-block;
-      background: var(--primary-yellow);
-      color: var(--white);
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.2rem 0.6rem;
-      border-radius: var(--radius-full);
-      margin-bottom: 0.5rem;
-      width: fit-content;
-    }
-    
-    .cart-item-options {
-      font-size: 0.9rem;
-      color: var(--dark-gray);
-      line-height: 1.5;
-    }
-    
-    .cart-item-option {
-      display: block;
-    }
-    
-    .cart-item-controls {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-    
-    .cart-item-price {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-orange);
-    }
-    
-    .cart-item-quantity {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--white);
-      padding: 0.3rem;
-      border-radius: var(--radius-full);
-      margin: var(--spacing-sm) 0;
-    }
-    
-    .qty-btn {
-      width: 28px;
-      height: 28px;
-      border: none;
-      background: var(--primary-orange);
-      color: var(--white);
-      border-radius: 50%;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .qty-btn:hover {
-      background: var(--accent-red);
-      transform: scale(1.15);
-    }
-    
-    .qty-value {
-      min-width: 30px;
-      text-align: center;
-      font-weight: 700;
-    }
-    
-    .remove-item-btn {
-      background: transparent;
-      border: 1px solid var(--accent-red);
-      color: var(--accent-red);
-      padding: 0.4rem 0.8rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-    
-    .remove-item-btn:hover {
-      background: var(--accent-red);
-      color: var(--white);
-    }
-    
-    /* 訂單摘要 */
-    .order-summary {
-      background: var(--white);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-lg);
-      box-shadow: var(--shadow-md);
-      position: sticky;
-      top: 90px;
-    }
-    
-    .summary-title {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: var(--spacing-md);
-      padding-bottom: var(--spacing-sm);
-      border-bottom: 2px solid var(--light-gray);
-    }
-    
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: var(--spacing-sm);
-      font-size: 1rem;
-    }
-    
-    .summary-label {
-      color: var(--dark-gray);
-    }
-    
-    .summary-value {
-      font-weight: 700;
-      color: var(--text-dark);
-    }
-    
-    .summary-divider {
-      height: 1px;
-      background: var(--medium-gray);
-      margin: var(--spacing-md) 0;
-    }
-    
-    .summary-total {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-orange);
-      margin-top: var(--spacing-md);
-      padding-top: var(--spacing-md);
-      border-top: 2px solid var(--primary-orange);
-    }
-    
-    .delivery-note {
-      background: var(--soft-peach);
-      padding: var(--spacing-sm);
-      border-radius: var(--radius-sm);
-      margin: var(--spacing-md) 0;
-      font-size: 0.9rem;
-      color: var(--dark-gray);
-      text-align: center;
-    }
-    
-    .checkout-btn {
-      width: 100%;
-      padding: var(--spacing-md);
-      background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
-      color: var(--white);
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      margin-top: var(--spacing-md);
-    }
-    
-    .checkout-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
-    }
-    
-    .checkout-btn:disabled {
-      background: var(--medium-gray);
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .continue-shopping-btn {
-      width: 100%;
-      padding: var(--spacing-sm);
-      background: var(--white);
-      color: var(--primary-orange);
-      border: 2px solid var(--primary-orange);
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      margin-top: var(--spacing-sm);
-    }
-    
-    .continue-shopping-btn:hover {
-      background: var(--primary-orange);
-      color: var(--white);
-    }
-    
-    /* 空購物車狀態 */
-    .empty-cart {
-      text-align: center;
-      padding: var(--spacing-xl) var(--spacing-lg);
-      background: var(--white);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-md);
-    }
-    
-    .empty-cart-icon {
-      font-size: 5rem;
-      margin-bottom: var(--spacing-md);
-      opacity: 0.5;
-    }
-    
-    .empty-cart-title {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: var(--spacing-sm);
-    }
-    
-    .empty-cart-text {
-      color: var(--dark-gray);
-      margin-bottom: var(--spacing-lg);
-    }
-    
-    /* 成功訊息 */
-    .success-message {
-      position: fixed;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--accent-green);
-      color: var(--white);
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-      z-index: 3000;
-      display: none;
-      animation: slideDown 0.3s ease;
-    }
-    
-    .success-message.show {
-      display: block;
-    }
-    
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-    }
-    
-    /* 響應式 */
-    @media (max-width: 968px) {
-      .cart-container {
-        grid-template-columns: 1fr;
-      }
-      
-      .order-summary {
-        position: static;
-      }
-    }
-    
-    @media (max-width: 568px) {
-      .cart-item {
-        grid-template-columns: 1fr;
-      }
-      
-      .cart-item-image {
-        width: 100%;
-        height: 180px;
-      }
-      
-      .cart-item-controls {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-  </style>
+  <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shop.js"></script>
 </head>
-
-<body>
-  <!-- 導覽列 -->
-  <nav class="navbar" id="navbar">
+<body class="cart-page">
+  <!-- 導覽列（與 index.html 一致）-->
+  <nav class="navbar">
     <div class="navbar-container">
-      <a href="index.html" class="navbar-logo">
-        <div class="logo-icon">🌅</div>
-        <div class="logo-text">
-          <div class="logo-title">晨光早餐店</div>
-          <div class="logo-subtitle">MORNING GLORY</div>
-        </div>
+      <a href="index.html" class="navbar-brand">
+        <span class="brand-icon">☀️</span>
+        <span class="brand-text">晨光早餐店</span>
       </a>
       
-      <button class="navbar-toggle" id="navbarToggle" aria-label="開啟選單">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      
-      <ul class="navbar-menu" id="navbarMenu">
-        <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
-        <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
-        <li><a href="profile.html" class="navbar-link">👤 會員中心</a></li>
-        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+      <ul class="navbar-menu">
+        <li><a href="index.html">首頁</a></li>
+        <li><a href="menu.html">線上點餐</a></li>
+        <li><a href="stores.html">門市查詢</a></li>
+        <li><a href="contact.html">聯絡我們</a></li>
+        
+        <!-- 購物車按鈕（用戶選單左邊）-->
         <li>
-          <a href="cart.html" class="navbar-link cart-link active">
+          <a href="cart.html" class="navbar-cart active">
             🛒 購物車
-            <span class="cart-badge" id="cartBadge">0</span>
+            <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
           </a>
+        </li>
+        
+        <!-- 用戶選單（最右邊）-->
+        <li class="navbar-user">
+          <a href="login.html" id="navbarUserLink">🔐 登入 / 註冊</a>
         </li>
       </ul>
     </div>
   </nav>
 
-  <!-- 主要內容 -->
-  <main>
-    <h1 class="section-title">🛒 購物車</h1>
-    
-    <div id="cartContent">
-      <!-- 由 JavaScript 動態生成 -->
+  <!-- 購物車主要內容 -->
+  <div class="cart-container">
+    <!-- 購物車標題 -->
+    <div class="cart-header">
+      <h1>🛒 我的購物車</h1>
+      <p>檢查您的美味選擇</p>
     </div>
-  </main>
 
-  <!-- 成功訊息 -->
-  <div class="success-message" id="successMessage"></div>
+    <!-- 購物車內容 -->
+    <div class="cart-content">
+      <!-- 左側：商品列表 -->
+      <div class="cart-items-section">
+        <div class="cart-items-header">
+          <span id="cartItemsCount">您的餐點</span>
+        </div>
 
-  <!-- 頁尾 -->
+        <!-- 空購物車狀態 -->
+        <div id="emptyCart" class="empty-cart" style="display: none;">
+          <div class="empty-cart-icon">🛒</div>
+          <h2>購物車還空空的喔~</h2>
+          <p>快去挑選美味的早餐，開啟美好的一天！</p>
+          <a href="menu.html" class="go-shopping-btn">🍳 前往點餐</a>
+        </div>
+
+        <!-- 購物車商品列表（保留此 ID）-->
+        <div id="cartItems"></div>
+      </div>
+
+      <!-- 右側：結帳摘要（桌面版）-->
+      <div id="cartSummary" class="cart-summary" style="display: none;">
+        <h2 class="summary-title">💰 訂單摘要</h2>
+
+        <!-- 折價券選擇（保留此區塊）-->
+        <div class="coupon-section">
+          <label for="couponSelect" class="coupon-label">🎫 使用折價券</label>
+          <select id="couponSelect" class="coupon-select" onchange="window.calculateTotal()">
+            <option value="">載入中...</option>
+          </select>
+        </div>
+
+        <!-- 折扣資訊（使用折價券時顯示）-->
+        <div id="discountInfo" class="discount-info" style="display: none;">
+          <div class="discount-row">
+            <span>原價</span>
+            <span id="originalPrice">$0</span>
+          </div>
+          <div class="discount-row total">
+            <span>💰 折扣優惠</span>
+            <span id="discountAmount">-$0</span>
+          </div>
+        </div>
+
+        <!-- 付款方式選擇（保留此區塊）-->
+        <div class="payment-section">
+          <label class="payment-label">💳 付款方式</label>
+          <div class="payment-methods">
+            <label class="payment-option">
+              <input type="radio" name="paymentMethod" value="cash" checked>
+              <span class="payment-icon">💵</span>
+              <span class="payment-text">現金付款</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="paymentMethod" value="linepay">
+              <span class="payment-icon">💚</span>
+              <span class="payment-text">Line Pay</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="paymentMethod" value="applepay">
+              <span class="payment-icon">🍎</span>
+              <span class="payment-text">Apple Pay</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 金額明細（無運費）-->
+        <div class="summary-row">
+          <span>小計</span>
+          <span id="cartSubtotal">$0</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <!-- 總計 -->
+        <div class="summary-total">
+          <span class="summary-total-label">總計</span>
+          <span class="summary-total-amount" id="cartTotal">$0</span>
+        </div>
+
+        <!-- 結帳按鈕 -->
+        <button onclick="window.checkout()" class="checkout-btn">
+          <span style="position: relative; z-index: 1;">🛒 確認結帳</span>
+        </button>
+
+        <a href="menu.html" class="continue-shopping">
+          ← 繼續選購
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手機版固定底部結帳按鈕（保留此區塊）-->
+  <div id="mobileCheckoutFooter" class="mobile-checkout-footer" style="display: none;">
+    <div class="mobile-checkout-content">
+      <div class="mobile-total">
+        <div class="mobile-total-label">總計金額</div>
+        <div class="mobile-total-amount" id="mobileCartTotal">$0</div>
+      </div>
+      <button onclick="window.checkout()" class="mobile-checkout-btn">
+        結帳 →
+      </button>
+    </div>
+  </div>
+
+  <!-- 頁尾（簡化美化版，與 index.html 一致）-->
   <footer class="footer">
     <div class="footer-container">
-      <div class="footer-section">
-        <h3>🌅 關於晨光</h3>
-        <p>
-          自1995年創立以來，晨光早餐店始終堅持使用新鮮食材，
-          為每一位顧客準備美味、健康的早餐。
-          讓每一天都從美好的早晨開始！
-        </p>
+      <!-- 品牌/關於 -->
+      <div class="footer-brand">
+        <h3>☀️ 晨光早餐店</h3>
+        <p>開啟美好的一天，從美味早餐開始。我們堅持使用新鮮食材，為您提供健康營養的早餐選擇。</p>
+      </div>
+      
+      <!-- 聯絡資訊 -->
+      <div class="footer-contact">
+        <h3>聯絡我們</h3>
+        <ul class="footer-contact-list">
+          <li>📞 電話：(04) 1234-5678</li>
+          <li>📍 地址：台中市西區美村路一段123號</li>
+          <li>🕒 營業時間：06:00 - 13:00</li>
+          <li>📧 Email：info@morning-glory.com</li>
+        </ul>
+      </div>
+      
+      <!-- 社群/版權 -->
+      <div class="footer-social-section">
+        <h3>追蹤我們</h3>
         <div class="footer-social">
-          <a href="#" class="social-icon" aria-label="Facebook">📘</a>
-          <a href="#" class="social-icon" aria-label="Instagram">📷</a>
-          <a href="#" class="social-icon" aria-label="Line">💬</a>
+          <a href="#" aria-label="Facebook" title="Facebook">📘</a>
+          <a href="#" aria-label="Instagram" title="Instagram">📷</a>
+          <a href="#" aria-label="Line" title="Line">💚</a>
         </div>
-      </div>
-      
-      <div class="footer-section">
-        <h3>📍 店家資訊</h3>
-        <div class="footer-info">
-          <span class="footer-info-icon">📞</span>
-          <span>(04) 2222-3333</span>
-        </div>
-        <div class="footer-info">
-          <span class="footer-info-icon">📍</span>
-          <span>台中市西區美村路一段123號</span>
-        </div>
-        <div class="footer-info">
-          <span class="footer-info-icon">⏰</span>
-          <span>週一至週日 06:00 - 14:00</span>
-        </div>
-        <div class="footer-info">
-          <span class="footer-info-icon">🚚</span>
-          <span>外送服務：滿 $300 免運費</span>
-        </div>
-      </div>
-      
-      <div class="footer-section">
-        <h3>🔗 快速連結</h3>
-        <ul>
-          <li><a href="index.html" class="footer-link">首頁</a></li>
-          <li><a href="menu.html" class="footer-link">線上點餐</a></li>
-          <li><a href="profile.html" class="footer-link">會員中心</a></li>
-          <li><a href="login.html" class="footer-link">登入 / 註冊</a></li>
-          <li><a href="cart.html" class="footer-link">購物車</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-section">
-        <h3>💡 顧客服務</h3>
-        <ul>
-          <li><a href="#" class="footer-link">常見問題</a></li>
-          <li><a href="#" class="footer-link">外送說明</a></li>
-          <li><a href="#" class="footer-link">付款方式</a></li>
-          <li><a href="#" class="footer-link">退換貨政策</a></li>
-          <li><a href="#" class="footer-link">聯絡我們</a></li>
-        </ul>
       </div>
     </div>
     
-    <div class="footer-copyright">
-      <p>&copy; 2025 晨光早餐店 Morning Glory Breakfast Shop. All Rights Reserved.</p>
-      <p>網站設計 by 晨光數位團隊 | 營業登記：12345678</p>
+    <div class="footer-bottom">
+      <p>&copy; 2024 晨光早餐店 Morning Glory Breakfast. All rights reserved.</p>
     </div>
   </footer>
 
-  <!-- JavaScript -->
-  <script src="js/cart.js"></script>
+  <!-- 初始化購物車頁面 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 購物車頁面載入完成');
+      
+      // 更新導覽列用戶顯示
+      if (typeof window.updateNavbarUser === 'function') {
+        window.updateNavbarUser();
+      }
+      
+      // 渲染購物車項目
+      if (typeof window.renderCartItems === 'function') {
+        window.renderCartItems();
+      } else {
+        console.error('❌ renderCartItems 函數未定義');
+      }
+      
+      // 載入可用折價券
+      if (typeof window.loadAvailableCoupons === 'function') {
+        window.loadAvailableCoupons();
+      } else {
+        console.warn('⚠️ loadAvailableCoupons 函數未定義');
+      }
+      
+      // 更新手機版底部總金額
+      window.updateMobileTotal = function() {
+        const total = document.getElementById('cartTotal')?.textContent || '$0';
+        const mobileTotal = document.getElementById('mobileCartTotal');
+        if (mobileTotal) {
+          mobileTotal.textContent = total;
+        }
+      };
+    });
+  </script>
+  
+  <style>
+    /* 付款方式選擇區塊樣式 */
+    .payment-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .payment-label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.8rem;
+      font-size: 1.05rem;
+    }
+    
+    .payment-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .payment-option:hover {
+      border-color: #FF6B35;
+      background: #FFF9F0;
+    }
+    
+    .payment-option input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #FF6B35;
+    }
+    
+    .payment-option input[type="radio"]:checked + .payment-icon {
+      transform: scale(1.2);
+    }
+    
+    .payment-option:has(input:checked) {
+      border-color: #FF6B35;
+      background: linear-gradient(135deg, #FFF3E0, #FFFFFF);
+      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.15);
+    }
+    
+    .payment-icon {
+      font-size: 1.5rem;
+      transition: transform 0.2s ease;
+    }
+    
+    .payment-text {
+      flex: 1;
+      font-weight: 600;
+      color: #333;
+      font-size: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .payment-option {
+        padding: 0.8rem;
+      }
+      
+      .payment-icon {
+        font-size: 1.3rem;
+      }
+      
+      .payment-text {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </body>
 </html>

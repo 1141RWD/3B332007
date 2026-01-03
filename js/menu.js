@@ -15,7 +15,8 @@ let orderOptions = {
   pickupType: 'now',
   pickupDate: null,
   pickupTime: null,
-  diningOption: 'takeout'
+  diningOption: 'takeout',
+  tableNumber: null  // 新增：桌號
 };
 
 // 搜尋相關
@@ -57,23 +58,6 @@ function initStoreSelect() {
   });
 }
 
-// ===== 初始化取餐方式 =====
-function initPickupType() {
-  const pickupType = document.getElementById('pickupType');
-  const scheduleOptions = document.getElementById('scheduleOptions');
-  
-  pickupType.addEventListener('change', (e) => {
-    orderOptions.pickupType = e.target.value;
-    
-    if (e.target.value === 'schedule') {
-      scheduleOptions.style.display = 'block';
-      generateTimeSlots();
-    } else {
-      scheduleOptions.style.display = 'none';
-    }
-  });
-}
-
 // ===== 生成時間選項 =====
 function generateTimeSlots() {
   const select = document.getElementById('pickupTime');
@@ -95,17 +79,133 @@ function generateTimeSlots() {
 
 // ===== 監聽用餐方式 =====
 function initDiningOption() {
-  document.getElementById('diningOption').addEventListener('change', (e) => {
+  const diningSelect = document.getElementById('diningOption');
+  const pickupTypeSelect = document.getElementById('pickupType');
+  const scheduleOptions = document.getElementById('scheduleOptions');
+  const tableOptions = document.getElementById('tableOptions');
+  const pickupTypeOptions = document.getElementById('pickupTypeOptions');
+  const tableSelect = document.getElementById('tableSelect');
+  
+  // 用餐方式改變時
+  diningSelect.addEventListener('change', (e) => {
     orderOptions.diningOption = e.target.value;
+    
+    if (e.target.value === 'dine-in') {
+      // 內用：顯示桌號選擇，隱藏取餐方式和預約時間
+      if (tableOptions) {
+        tableOptions.style.display = 'block';
+      }
+      if (pickupTypeOptions) {
+        pickupTypeOptions.style.display = 'none';
+      }
+      if (scheduleOptions) {
+        scheduleOptions.style.display = 'none';
+      }
+      // 重置外帶相關設定
+      orderOptions.pickupType = 'now';
+      orderOptions.pickupDate = null;
+      orderOptions.pickupTime = null;
+      if (pickupTypeSelect) {
+        pickupTypeSelect.value = 'now';
+      }
+    } else {
+      // 外帶：顯示取餐方式，隱藏桌號
+      if (tableOptions) {
+        tableOptions.style.display = 'none';
+      }
+      if (pickupTypeOptions) {
+        pickupTypeOptions.style.display = 'block';
+      }
+      // 根據取餐方式決定是否顯示預約時間
+      if (pickupTypeSelect && pickupTypeSelect.value === 'schedule') {
+        if (scheduleOptions) {
+          scheduleOptions.style.display = 'block';
+        }
+      } else {
+        if (scheduleOptions) {
+          scheduleOptions.style.display = 'none';
+        }
+      }
+      // 重置桌號
+      orderOptions.tableNumber = null;
+      if (tableSelect) {
+        tableSelect.value = '';
+      }
+    }
+    
+    localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
   });
   
+  // 取餐方式改變時（僅外帶模式下有效）
+  if (pickupTypeSelect) {
+    pickupTypeSelect.addEventListener('change', (e) => {
+      orderOptions.pickupType = e.target.value;
+      
+      if (e.target.value === 'schedule') {
+        // 預約取餐：顯示預約時間並生成時間選項
+        if (scheduleOptions) {
+          scheduleOptions.style.display = 'block';
+        }
+        generateTimeSlots();
+      } else {
+        // 立即取餐：隱藏預約時間
+        if (scheduleOptions) {
+          scheduleOptions.style.display = 'none';
+        }
+        // 重置預約時間
+        orderOptions.pickupDate = null;
+        orderOptions.pickupTime = null;
+      }
+      
+      localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
+    });
+  }
+  
+  // 桌號選擇
+  if (tableSelect) {
+    tableSelect.addEventListener('change', (e) => {
+      orderOptions.tableNumber = e.target.value;
+      localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
+    });
+  }
+  
+  // 預約時間相關
   document.getElementById('pickupDate')?.addEventListener('change', (e) => {
     orderOptions.pickupDate = e.target.value;
+    localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
   });
   
   document.getElementById('pickupTime')?.addEventListener('change', (e) => {
     orderOptions.pickupTime = e.target.value;
+    localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
   });
+  
+  // 讀取已儲存的設定
+  const savedOptions = localStorage.getItem('orderOptions');
+  if (savedOptions) {
+    try {
+      const options = JSON.parse(savedOptions);
+      
+      // 恢復用餐方式
+      if (options.diningOption) {
+        diningSelect.value = options.diningOption;
+        diningSelect.dispatchEvent(new Event('change'));
+        
+        // 恢復桌號（如果是內用）
+        if (options.diningOption === 'dine-in' && options.tableNumber && tableSelect) {
+          tableSelect.value = options.tableNumber;
+        }
+        
+        // 恢復取餐方式（如果是外帶）
+        if (options.diningOption === 'takeout' && options.pickupType && pickupTypeSelect) {
+          pickupTypeSelect.value = options.pickupType;
+          pickupTypeSelect.dispatchEvent(new Event('change'));
+        }
+      }
+    } catch (e) {
+      console.error('讀取訂單選項時發生錯誤：', e);
+    }
+  }
 }
 
 // ===== 導覽列功能 =====
@@ -601,9 +701,9 @@ document.addEventListener('DOMContentLoaded', () => {
   displayProducts();
   setupCategoryFilter();
   initStoreSelect();
-  initPickupType();
   initDiningOption();
   initSearch(); // 初始化搜尋功能
+  generateTimeSlots(); // 生成預約時間選項
   
   // 設定當前頁面的導覽連結為 active
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聯絡我們 - 晨光早餐店</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
+  <style>
+    .contact-container {
+      max-width: 800px;
+      margin: 100px auto 50px;
+      padding: var(--spacing-xl);
+    }
+    
+    .contact-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .contact-header h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--primary-orange);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .contact-header p {
+      font-size: 1.1rem;
+      color: var(--dark-gray);
+    }
+    
+    .contact-form {
+      background: var(--white);
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: var(--spacing-sm);
+      font-size: 1.05rem;
+    }
+    
+    .form-label .required {
+      color: var(--accent-red);
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: var(--transition-fast);
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: var(--spacing-lg);
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-red));
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-base);
+      box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+    }
+    
+    .submit-btn:disabled {
+      background: var(--medium-gray);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .success-message {
+      background: #E8F5E9;
+      border-left: 4px solid #4CAF50;
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-lg);
+      display: none;
+    }
+    
+    .success-message.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .contact-info {
+      background: var(--soft-peach);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      margin-top: var(--spacing-xl);
+    }
+    
+    .contact-info h3 {
+      color: var(--primary-orange);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+      font-size: 1.05rem;
+    }
+    
+    .info-icon {
+      font-size: 1.3rem;
+    }
+    
+    @media (max-width: 768px) {
+      .contact-container {
+        margin-top: 80px;
+        padding: var(--spacing-md);
+      }
+      
+      .contact-header h1 {
+        font-size: 2rem;
+      }
+      
+      .contact-form {
+        padding: var(--spacing-lg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 導覽列 -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">聯絡我們</div>
+        </div>
+      </a>
+      
+      <div class="navbar-menu" id="navbarMenu">
+        <a href="index.html" class="navbar-link">🏠 首頁</a>
+        <a href="menu.html" class="navbar-link">🍳 點餐</a>
+        <a href="cart.html" class="navbar-link">
+          🛒 購物車
+          <span class="cart-badge" id="cartBadge">0</span>
+        </a>
+        <div id="loginBtn" class="navbar-link">
+          <a href="login.html">🔐 登入 / 註冊</a>
+        </div>
+      </div>
+      
+      <button class="navbar-toggle" id="navbarToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 聯絡表單 -->
+  <div class="contact-container">
+    <div class="contact-header">
+      <h1>💬 聯絡我們</h1>
+      <p>有任何問題或建議？我們很樂意聽到您的聲音！</p>
+    </div>
+
+    <div class="success-message" id="successMessage">
+      <h3>✅ 訊息已成功送出！</h3>
+      <p>我們會盡快回覆您，請留意您的會員中心訊息。</p>
+    </div>
+
+    <form class="contact-form" id="contactForm">
+      <div class="form-group">
+        <label class="form-label">
+          姓名 <span class="required">*</span>
+        </label>
+        <input type="text" class="form-input" id="userName" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          Email <span class="required">*</span>
+        </label>
+        <input type="email" class="form-input" id="userEmail" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          聯絡電話
+        </label>
+        <input type="tel" class="form-input" id="userPhone" placeholder="例：0912-345-678">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          問題類別 <span class="required">*</span>
+        </label>
+        <select class="form-select" id="subject" required>
+          <option value="">請選擇問題類別</option>
+          <option value="訂單問題">訂單問題</option>
+          <option value="商品諮詢">商品諮詢</option>
+          <option value="配送問題">配送問題</option>
+          <option value="付款問題">付款問題</option>
+          <option value="會員問題">會員問題</option>
+          <option value="建議與意見">建議與意見</option>
+          <option value="其他問題">其他問題</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          訊息內容 <span class="required">*</span>
+        </label>
+        <textarea class="form-textarea" id="message" required placeholder="請詳細描述您的問題或建議..."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        📤 送出訊息
+      </button>
+    </form>
+
+    <div class="contact-info">
+      <h3>📞 其他聯絡方式</h3>
+      <div class="info-item">
+        <span class="info-icon">📞</span>
+        <span>客服專線：(04) 2222-3333</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">📧</span>
+        <span>Email：<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5122342327383234113c3e233f383f367c363d3e23287f323e3c">[email&#160;protected]</a></span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">⏰</span>
+        <span>服務時間：週一至週日 06:00 - 14:00</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">📍</span>
+        <span>總店地址：台中

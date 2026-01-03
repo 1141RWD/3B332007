@@ -14,6 +14,9 @@
   <title>晨光早餐店 - 每一天，從美好早餐開始</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
   <style>
     /* 首頁專屬樣式 */
     
@@ -630,8 +633,7 @@
       <ul class="navbar-menu" id="navbarMenu">
         <li><a href="index.html" class="navbar-link active">🏠 首頁</a></li>
         <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
-        <li><a href="profile.html" class="navbar-link">👤 會員中心</a></li>
-        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+        <li><div id="loginBtn" class="navbar-link"><a href="login.html">🔐 登入 / 註冊</a></div></li>
         <li>
           <a href="cart.html" class="navbar-link cart-link">
             🛒 購物車

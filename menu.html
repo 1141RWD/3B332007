@@ -10,6 +10,9 @@
   <title>線上點餐 - 晨光早餐店</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+  <script src="js/coupon-system.js"></script>
   <style>
     /* 線上點餐專屬樣式 */
     
@@ -597,8 +600,8 @@
       <ul class="navbar-menu" id="navbarMenu">
         <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
         <li><a href="menu.html" class="navbar-link active">🍳 線上點餐</a></li>
-        <li><a href="profile.html" class="navbar-link">👤 會員中心</a></li>
-        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+        
+        <li><div id="loginBtn" class="navbar-link"><a href="login.html">🔐 登入 / 註冊</a></div></li>
         <li>
           <a href="cart.html" class="navbar-link cart-link">
             🛒 購物車
@@ -630,8 +633,40 @@
           </select>
         </div>
         
-        <!-- 取餐方式 -->
+        <!-- 用餐方式 -->
         <div>
+          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🍽️ 用餐方式</label>
+          <select id="diningOption" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
+            <option value="takeout">📦 外帶</option>
+            <option value="dine-in">🍽️ 內用</option>
+          </select>
+        </div>
+
+        <!-- 桌號選擇（僅內用顯示） -->
+        <div id="tableOptions" style="display: none; margin-top: var(--spacing-md);">
+          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🪑 桌號選擇</label>
+          <select id="tableSelect" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
+            <option value="">請選擇桌號</option>
+            <option value="A1">A1 桌（2人桌）</option>
+            <option value="A2">A2 桌（2人桌）</option>
+            <option value="A3">A3 桌（2人桌）</option>
+            <option value="B1">B1 桌（2人桌）</option>
+            <option value="B2">B2 桌（2人桌）</option>
+            <option value="B3">B3 桌（2人桌）</option>
+            <option value="C1">C1 桌（2人桌）</option>
+            <option value="C2">C2 桌（2人桌）</option>
+            <option value="C3">C3 桌（2人桌）</option>
+            <option value="D1">D1 桌（4人桌）</option>
+            <option value="D2">D2 桌（4人桌）</option>
+            <option value="D3">D3 桌（4人桌）</option>
+            <option value="E1">E1 桌（6人桌）</option>
+            <option value="E2">E2 桌（6人桌）</option>
+            <option value="VIP">VIP 包廂</option>
+          </select>
+        </div>
+        
+        <!-- 取餐方式（僅外帶顯示） -->
+        <div id="pickupTypeOptions" style="display: none; margin-top: var(--spacing-md);">
           <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🕒 取餐方式</label>
           <select id="pickupType" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
             <option value="now">立即取餐</option>
@@ -639,8 +674,8 @@
           </select>
         </div>
         
-        <!-- 預約時間 -->
-        <div id="scheduleOptions" style="display: none;">
+        <!-- 預約時間（僅外帶且選擇預約時顯示） -->
+        <div id="scheduleOptions" style="display: none; margin-top: var(--spacing-md);">
           <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">⏰ 預約時間</label>
           <div style="display: flex; gap: var(--spacing-xs);">
             <select id="pickupDate" style="flex: 1; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm);">
@@ -651,15 +686,6 @@
               <!-- 動態生成 -->
             </select>
           </div>
-        </div>
-        
-        <!-- 用餐方式 -->
-        <div>
-          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🍽️ 用餐方式</label>
-          <select id="diningOption" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
-            <option value="takeout">📦 外帶</option>
-            <option value="dine-in">🍽️ 內用</option>
-          </select>
         </div>
       </div>
     </div>
