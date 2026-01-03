@@ -76,40 +76,42 @@ function switchTab(tabName) {
 function loadOrders() {
   const orders = JSON.parse(localStorage.getItem('orders') || '[]');
   const tableHtml = `
-    <table>
-      <thead>
-        <tr>
-          <th>訂單編號</th>
-          <th>顧客</th>
-          <th>用餐方式</th>
-          <th>金額</th>
-          <th>狀態</th>
-          <th>時間</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${orders.length === 0 ? '<tr><td colspan="7" style="text-align: center; padding: 2rem;">目前沒有訂單</td></tr>' : orders.map(order => `
+    <div class="table-responsive">
+      <table>
+        <thead>
           <tr>
-            <td><strong>${order.id}</strong></td>
-            <td>${order.customerName || order.customerEmail}</td>
-            <td>${order.diningOption === 'dine-in' ? '🪑 內用' : '🛍️ 外帶'}${order.tableNumber ? ' - ' + order.tableNumber : ''}</td>
-            <td>$${order.total}</td>
-            <td>
-              <span class="status-badge ${getStatusClass(order.status)}">
-                ${getStatusText(order.status)}
-              </span>
-            </td>
-            <td>${new Date(order.createdAt).toLocaleString('zh-TW')}</td>
-            <td>
-              <button class="action-btn btn-view" onclick="viewOrder('${order.id}')">查看</button>
-              <button class="action-btn btn-edit" onclick="updateOrderStatus('${order.id}')">狀態</button>
-              <button class="action-btn btn-delete" onclick="deleteOrder('${order.id}')">刪除</button>
-            </td>
+            <th>訂單編號</th>
+            <th>顧客</th>
+            <th>用餐方式</th>
+            <th>金額</th>
+            <th>狀態</th>
+            <th>時間</th>
+            <th>操作</th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          ${orders.length === 0 ? '<tr><td colspan="7" style="text-align: center; padding: 2rem;">目前沒有訂單</td></tr>' : orders.map(order => `
+            <tr>
+              <td><strong>${order.id}</strong></td>
+              <td>${order.customerName || order.customerEmail}</td>
+              <td>${order.diningOption === 'dine-in' ? '🪑 內用' : '🛍️ 外帶'}${order.tableNumber ? ' - ' + order.tableNumber : ''}</td>
+              <td>$${order.total}</td>
+              <td>
+                <span class="status-badge ${getStatusClass(order.status)}">
+                  ${getStatusText(order.status)}
+                </span>
+              </td>
+              <td>${new Date(order.createdAt).toLocaleString('zh-TW')}</td>
+              <td>
+                <button class="action-btn btn-view" onclick="viewOrder('${order.id}')">查看</button>
+                <button class="action-btn btn-edit" onclick="updateOrderStatus('${order.id}')">狀態</button>
+                <button class="action-btn btn-delete" onclick="deleteOrder('${order.id}')">刪除</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
   
   document.getElementById('ordersTable').innerHTML = tableHtml;
@@ -423,49 +425,51 @@ window.confirmDeleteOrder = function(orderId) {
 function loadMembers() {
   const users = JSON.parse(localStorage.getItem('users') || '[]');
   const tableHtml = `
-    <table>
-      <thead>
-        <tr>
-          <th>姓名</th>
-          <th>Email</th>
-          <th>電話</th>
-          <th>點數</th>
-          <th>狀態</th>
-          <th>註冊時間</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${users.length === 0 ? '<tr><td colspan="7" style="text-align: center; padding: 2rem;">目前沒有會員</td></tr>' : users.map(user => `
+    <div class="table-responsive">
+      <table>
+        <thead>
           <tr>
-            <td><strong>${user.name}</strong></td>
-            <td>${user.email}</td>
-            <td>${user.phone || '未提供'}</td>
-            <td>${user.points || 0} 點</td>
-            <td>
-              <span class="status-badge ${user.active !== false ? 'status-completed' : 'status-cancelled'}">
-                ${user.active !== false ? '正常' : '停權'}
-              </span>
-            </td>
-            <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-TW') : '未知'}</td>
-            <td>
-              <button class="action-btn btn-view" onclick="viewMember('${user.email}')">查看</button>
-              <button class="action-btn btn-edit" onclick="editMemberPoints('${user.email}')">點數</button>
-              <button class="action-btn ${user.active !== false ? 'btn-delete' : 'btn-edit'}" 
-                onclick="toggleMemberStatus('${user.email}')">
-                ${user.active !== false ? '停權' : '啟用'}
-              </button>
-              ${user.role === 'user' 
-                ? `<button class="action-btn btn-edit" onclick="promoteToAdmin('${user.email}')" style="background: #4CAF50;">設為管理員</button>`
-                : user.role === 'admin' 
-                  ? `<button class="action-btn btn-edit" onclick="demoteToUser('${user.email}')" style="background: #FF9800;">降級</button>`
-                  : ''
-              }
-            </td>
+            <th>姓名</th>
+            <th>Email</th>
+            <th>電話</th>
+            <th>點數</th>
+            <th>狀態</th>
+            <th>註冊時間</th>
+            <th>操作</th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          ${users.length === 0 ? '<tr><td colspan="7" style="text-align: center; padding: 2rem;">目前沒有會員</td></tr>' : users.map(user => `
+            <tr>
+              <td><strong>${user.name}</strong></td>
+              <td>${user.email}</td>
+              <td>${user.phone || '未提供'}</td>
+              <td>${user.points || 0} 點</td>
+              <td>
+                <span class="status-badge ${user.active !== false ? 'status-completed' : 'status-cancelled'}">
+                  ${user.active !== false ? '正常' : '停權'}
+                </span>
+              </td>
+              <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-TW') : '未知'}</td>
+              <td>
+                <button class="action-btn btn-view" onclick="viewMember('${user.email}')">查看</button>
+                <button class="action-btn btn-edit" onclick="editMemberPoints('${user.email}')">點數</button>
+                <button class="action-btn ${user.active !== false ? 'btn-delete' : 'btn-edit'}" 
+                  onclick="toggleMemberStatus('${user.email}')">
+                  ${user.active !== false ? '停權' : '啟用'}
+                </button>
+                ${user.role === 'user' 
+                  ? `<button class="action-btn btn-edit" onclick="promoteToAdmin('${user.email}')" style="background: #4CAF50;">設為管理員</button>`
+                  : user.role === 'admin' 
+                    ? `<button class="action-btn btn-edit" onclick="demoteToUser('${user.email}')" style="background: #FF9800;">降級</button>`
+                    : ''
+                }
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
   
   document.getElementById('membersTable').innerHTML = tableHtml;
@@ -873,47 +877,49 @@ window.confirmToggleMemberStatus = function(email) {
 // ===== 商品管理 =====
 function loadProducts() {
   const tableHtml = `
-    <table>
-      <thead>
-        <tr>
-          <th>圖片</th>
-          <th>名稱</th>
-          <th>分類</th>
-          <th>價格</th>
-          <th>標籤</th>
-          <th>狀態</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${products.map((product, index) => `
+    <div class="table-responsive">
+      <table>
+        <thead>
           <tr>
-            <td>
-              <img src="${product.image}" alt="${product.name}" 
-                style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;"
-                onerror="this.src='images/placeholder.jpg'">
-            </td>
-            <td><strong>${product.name}</strong></td>
-            <td>${product.category}</td>
-            <td>$${product.price}</td>
-            <td>${product.tags ? product.tags.join(', ') : '-'}</td>
-            <td>
-              <span class="status-badge ${product.available !== false ? 'status-completed' : 'status-cancelled'}">
-                ${product.available !== false ? '上架' : '下架'}
-              </span>
-            </td>
-            <td>
-              <button class="action-btn btn-view" onclick="viewProduct('${product.id}')">查看</button>
-              <button class="action-btn btn-edit" onclick="editProduct('${product.id}')">編輯</button>
-              <button class="action-btn ${product.available !== false ? 'btn-delete' : 'btn-edit'}" 
-                onclick="toggleProductStatus('${product.id}')">
-                ${product.available !== false ? '下架' : '上架'}
-              </button>
-            </td>
+            <th>圖片</th>
+            <th>名稱</th>
+            <th>分類</th>
+            <th>價格</th>
+            <th>標籤</th>
+            <th>狀態</th>
+            <th>操作</th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          ${products.map((product, index) => `
+            <tr>
+              <td>
+                <img src="${product.image}" alt="${product.name}" 
+                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;"
+                  onerror="this.src='images/placeholder.jpg'">
+              </td>
+              <td><strong>${product.name}</strong></td>
+              <td>${product.category}</td>
+              <td>$${product.price}</td>
+              <td>${product.tags ? product.tags.join(', ') : '-'}</td>
+              <td>
+                <span class="status-badge ${product.available !== false ? 'status-completed' : 'status-cancelled'}">
+                  ${product.available !== false ? '上架' : '下架'}
+                </span>
+              </td>
+              <td>
+                <button class="action-btn btn-view" onclick="viewProduct('${product.id}')">查看</button>
+                <button class="action-btn btn-edit" onclick="editProduct('${product.id}')">編輯</button>
+                <button class="action-btn ${product.available !== false ? 'btn-delete' : 'btn-edit'}" 
+                  onclick="toggleProductStatus('${product.id}')">
+                  ${product.available !== false ? '下架' : '上架'}
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
   
   document.getElementById('productsTable').innerHTML = tableHtml;
@@ -1295,41 +1301,43 @@ window.confirmAddProduct = function() {
 function loadMessages() {
   const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
   const tableHtml = `
-    <table>
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>會員</th>
-          <th>主旨</th>
-          <th>狀態</th>
-          <th>提交時間</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${messages.length === 0 ? '<tr><td colspan="6" style="text-align: center; padding: 2rem;">目前沒有訊息</td></tr>' : messages.map(msg => `
+    <div class="table-responsive">
+      <table>
+        <thead>
           <tr>
-            <td><strong>${msg.id}</strong></td>
-            <td>${msg.userName}<br><small>${msg.userEmail}</small></td>
-            <td>${msg.subject}</td>
-            <td>
-              <span class="status-badge ${msg.status === 'pending' ? 'status-pending' : 'status-completed'}">
-                ${msg.status === 'pending' ? '⏳ 待回覆' : '✅ 已回覆'}
-              </span>
-            </td>
-            <td>${new Date(msg.createdAt).toLocaleString('zh-TW')}</td>
-            <td>
-              <button class="action-btn btn-view" onclick="viewMessage('${msg.id}')">查看</button>
-              ${msg.status === 'pending' ? 
-                `<button class="action-btn btn-edit" onclick="replyMessage('${msg.id}')">回覆</button>` : 
-                `<button class="action-btn btn-view" onclick="viewReply('${msg.id}')">查看回覆</button>`
-              }
-              <button class="action-btn btn-delete" onclick="deleteMessage('${msg.id}')">刪除</button>
-            </td>
+            <th>編號</th>
+            <th>會員</th>
+            <th>主旨</th>
+            <th>狀態</th>
+            <th>提交時間</th>
+            <th>操作</th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          ${messages.length === 0 ? '<tr><td colspan="6" style="text-align: center; padding: 2rem;">目前沒有訊息</td></tr>' : messages.map(msg => `
+            <tr>
+              <td><strong>${msg.id}</strong></td>
+              <td>${msg.userName}<br><small>${msg.userEmail}</small></td>
+              <td>${msg.subject}</td>
+              <td>
+                <span class="status-badge ${msg.status === 'pending' ? 'status-pending' : 'status-completed'}">
+                  ${msg.status === 'pending' ? '⏳ 待回覆' : '✅ 已回覆'}
+                </span>
+              </td>
+              <td>${new Date(msg.createdAt).toLocaleString('zh-TW')}</td>
+              <td>
+                <button class="action-btn btn-view" onclick="viewMessage('${msg.id}')">查看</button>
+                ${msg.status === 'pending' ? 
+                  `<button class="action-btn btn-edit" onclick="replyMessage('${msg.id}')">回覆</button>` : 
+                  `<button class="action-btn btn-view" onclick="viewReply('${msg.id}')">查看回覆</button>`
+                }
+                <button class="action-btn btn-delete" onclick="deleteMessage('${msg.id}')">刪除</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
   
   document.getElementById('messagesTable').innerHTML = tableHtml;

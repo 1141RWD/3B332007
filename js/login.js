@@ -13,7 +13,11 @@ if (navbarToggle) {
 
 const navbarLinks = document.querySelectorAll('.navbar-link');
 navbarLinks.forEach(link => {
-  link.addEventListener('click', () => {
+  link.addEventListener('click', (e) => {
+    // 如果點擊的是下拉選單項目或用戶選單，不關閉導覽列
+    if (e.target.closest('.user-menu') || e.target.closest('.user-dropdown') || e.target.closest('.dropdown-item')) {
+      return;
+    }
     if (window.innerWidth <= 768) {
       navbarToggle.classList.remove('active');
       navbarMenu.classList.remove('active');

@@ -66,6 +66,12 @@ function initStoreSelect() {
 // ===== 生成時間選項 =====
 function generateTimeSlots() {
   const select = document.getElementById('pickupTime');
+  
+  // 如果元素不存在，提前返回（時間選項可能已移至其他頁面）
+  if (!select) {
+    return;
+  }
+  
   select.innerHTML = '';
   
   const startHour = 6;
@@ -90,6 +96,11 @@ function initDiningOption() {
   const tableOptions = document.getElementById('tableOptions');
   const pickupTypeOptions = document.getElementById('pickupTypeOptions');
   const tableSelect = document.getElementById('tableSelect');
+  
+  // 如果元素不存在，提前返回（用餐選項可能已移至其他頁面）
+  if (!diningSelect) {
+    return;
+  }
   
   // 用餐方式改變時
   diningSelect.addEventListener('change', (e) => {
@@ -226,7 +237,11 @@ if (navbarToggle) {
 
 const navbarLinks = document.querySelectorAll('.navbar-link');
 navbarLinks.forEach(link => {
-  link.addEventListener('click', () => {
+  link.addEventListener('click', (e) => {
+    // 如果點擊的是下拉選單項目或用戶選單，不關閉導覽列
+    if (e.target.closest('.user-menu') || e.target.closest('.user-dropdown') || e.target.closest('.dropdown-item')) {
+      return;
+    }
     if (window.innerWidth <= 768) {
       navbarToggle.classList.remove('active');
       navbarMenu.classList.remove('active');

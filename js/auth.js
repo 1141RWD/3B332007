@@ -39,14 +39,14 @@ function updateAuthUI() {
       // 管理員：只顯示管理後台和登出
       loginBtn.innerHTML = `
         <div class="user-menu" style="margin-left: auto;">
-          <button class="user-menu-btn" onclick="toggleUserMenu()">
+          <button class="user-menu-btn" onclick="toggleUserMenu(); event.stopPropagation();">
             <span class="user-avatar">👨‍💼</span>
             <span class="user-name">${currentUser.name || '管理員'}</span>
             <span class="dropdown-arrow">▼</span>
           </button>
           <div class="user-dropdown" id="userDropdown">
-            <a href="admin.html" class="dropdown-item">🔧 管理後台</a>
-            <a href="#" class="dropdown-item" onclick="logout(); return false;">🚪 登出</a>
+            <a href="admin.html" class="dropdown-item" onclick="event.stopPropagation();">🔧 管理後台</a>
+            <a href="#" class="dropdown-item" onclick="event.stopPropagation(); logout(); return false;">🚪 登出</a>
           </div>
         </div>
       `;
@@ -54,18 +54,34 @@ function updateAuthUI() {
       // 一般用戶：顯示會員中心和登出（不顯示購物車）
       loginBtn.innerHTML = `
         <div class="user-menu" style="margin-left: auto;">
-          <button class="user-menu-btn" onclick="toggleUserMenu()">
+          <button class="user-menu-btn" onclick="toggleUserMenu(); event.stopPropagation();">
             <span class="user-avatar">👤</span>
             <span class="user-name">${currentUser.name || currentUser.email}</span>
             <span class="dropdown-arrow">▼</span>
           </button>
           <div class="user-dropdown" id="userDropdown">
-            <a href="profile.html" class="dropdown-item">👤 會員中心</a>
-            <a href="#" class="dropdown-item" onclick="logout(); return false;">🚪 登出</a>
+            <a href="profile.html" class="dropdown-item" onclick="event.stopPropagation();">👤 會員中心</a>
+            <a href="#" class="dropdown-item" onclick="event.stopPropagation(); logout(); return false;">🚪 登出</a>
           </div>
         </div>
       `;
     }
+    
+    // 為下拉選單項目添加事件監聽器，阻止事件冒泡
+    setTimeout(() => {
+      const dropdownItems = document.querySelectorAll('.dropdown-item');
+      dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      });
+      
+      // 手機版：確保下拉選單始終顯示
+      const dropdown = document.getElementById('userDropdown');
+      if (dropdown && window.innerWidth <= 768) {
+        dropdown.classList.add('show');
+      }
+    }, 100);
     
     // 隱藏不需要的導覽列項目
     hideNavItemsForRole(currentUser.role);
@@ -109,6 +125,11 @@ function hideNavItemsForRole(role) {
 
 // ===== 切換使用者選單 =====
 function toggleUserMenu() {
+  // 手機版不需要切換功能，直接返回
+  if (window.innerWidth <= 768) {
+    return;
+  }
+  
   const dropdown = document.getElementById('userDropdown');
   if (dropdown) {
     dropdown.classList.toggle('show');
@@ -117,9 +138,26 @@ function toggleUserMenu() {
 
 // 點擊其他地方關閉選單
 document.addEventListener('click', (e) => {
+  // 手機版不需要關閉下拉選單的功能
+  if (window.innerWidth <= 768) {
+    return;
+  }
+  
   const userMenu = document.querySelector('.user-menu');
   const dropdown = document.getElementById('userDropdown');
   
+  // 如果點擊的是用戶選單內的任何元素，不關閉下拉選單
+  if (e.target.closest('.user-menu')) {
+    // 如果點擊的是下拉選單項目，關閉下拉選單但允許連結跳轉
+    if (e.target.closest('.dropdown-item')) {
+      if (dropdown) {
+        dropdown.classList.remove('show');
+      }
+    }
+    return;
+  }
+  
+  // 點擊外部時關閉下拉選單
   if (userMenu && dropdown && !userMenu.contains(e.target)) {
     dropdown.classList.remove('show');
   }

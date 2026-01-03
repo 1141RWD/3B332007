@@ -202,6 +202,7 @@ body {
   justify-content: center;
   border: 2px solid var(--white);
   animation: pulse 2s infinite;
+  z-index: 1;
 }
 
 @keyframes pulse {
@@ -442,6 +443,103 @@ main {
     left: 0;
   }
   
+  .user-menu {
+    position: relative;
+    width: 100%;
+    z-index: 1002;
+  }
+  
+  /* 手機版：將按鈕改為不可點擊的標題樣式 */
+  .user-menu-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    position: relative;
+    z-index: 1003;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0;
+    cursor: default;
+    pointer-events: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-weight: 700;
+    color: var(--text-dark);
+    border-bottom: 2px solid var(--light-gray);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .user-menu-btn:hover {
+    background: transparent !important;
+    color: var(--text-dark) !important;
+    transform: none;
+  }
+  
+  /* 手機版：隱藏下拉箭頭 */
+  .dropdown-arrow {
+    display: none;
+  }
+  
+  /* 手機版：將下拉選單改為平鋪顯示 */
+  .user-dropdown {
+    position: static !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    min-width: auto !important;
+    right: auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    z-index: 1;
+    pointer-events: auto;
+    background: transparent;
+  }
+  
+  .user-dropdown.show {
+    transform: none;
+    display: block;
+  }
+  
+  /* 手機版：下拉選單項目樣式與導覽列項目一致 */
+  .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--light-gray);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 44px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .dropdown-item:hover,
+  .dropdown-item:active {
+    background: var(--soft-peach);
+    color: var(--primary-orange);
+  }
+  
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* 確保購物車不會覆蓋下拉選單 */
+  .cart-badge {
+    z-index: 1;
+  }
+  
+  .navbar-link.cart-link {
+    z-index: 1;
+    position: relative;
+  }
+  
   .navbar-toggle {
     display: flex;
   }
@@ -544,6 +642,7 @@ main {
 /* 使用者選單樣式 */
 .user-menu {
   position: relative;
+  z-index: 1002;
 }
 
 .user-menu-btn {
@@ -599,13 +698,15 @@ main {
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s;
-  z-index: 1000;
+  z-index: 1002;
+  pointer-events: none;
 }
 
 .user-dropdown.show {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+  pointer-events: auto;
 }
 
 .dropdown-item {
@@ -617,15 +718,27 @@ main {
   text-decoration: none;
   transition: var(--transition-fast);
   border-bottom: 1px solid var(--medium-gray);
+  cursor: pointer;
+  min-height: 44px;
+  -webkit-tap-highlight-color: rgba(255, 107, 53, 0.2);
 }
 
 .dropdown-item:last-child {
   border-bottom: none;
 }
 
-.dropdown-item:hover {
+.dropdown-item:hover,
+.dropdown-item:active {
   background: var(--soft-peach);
   color: var(--primary-orange);
+}
+
+@media (max-width: 768px) {
+  .dropdown-item {
+    padding: 1rem 1.2rem;
+    min-height: 48px;
+    font-size: 1rem;
+  }
 }
 
 /* 導覽列右側對齊 */
