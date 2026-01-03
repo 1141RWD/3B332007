@@ -41,8 +41,8 @@ window.addToCart = function(productId, skipModal = false) {
     console.error('找不到商品:', productId);
     if (typeof window.showError === 'function') {
       window.showError('找不到商品');
-    } else {
-      alert('找不到商品');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('找不到商品', 'error');
     }
     return;
   }
@@ -77,8 +77,8 @@ window.addToCart = function(productId, skipModal = false) {
   
   if (typeof window.showSuccess === 'function') {
     window.showSuccess(`✅ ${product.name} 已加入購物車`);
-  } else {
-    alert(`${product.name} 已加入購物車`);
+  } else if (typeof window.showToast === 'function') {
+    window.showToast(`${product.name} 已加入購物車`, 'success');
   }
   
   console.log('✅ 購物車已更新:', window.cart);
@@ -150,8 +150,8 @@ window.confirmCustomization = function() {
   
   if (typeof window.showSuccess === 'function') {
     window.showSuccess(`✅ ${window.currentProduct.name} 已加入購物車`);
-  } else {
-    alert(`${window.currentProduct.name} 已加入購物車`);
+  } else if (typeof window.showToast === 'function') {
+    window.showToast(`${window.currentProduct.name} 已加入購物車`, 'success');
   }
   
   console.log('✅ 購物車已更新（含客製化）:', window.cart);
@@ -215,9 +215,19 @@ window.renderCartItems = function() {
       `;
     }
     
+    // 處理圖片路徑（確保相對路徑正確）
+    let imagePath = item.image || 'images/placeholder.jpg';
+    // 如果圖片路徑不是以 http 或 / 開頭，確保是相對路徑
+    if (!imagePath.startsWith('http') && !imagePath.startsWith('/')) {
+      // 確保路徑以 images/ 開頭
+      if (!imagePath.startsWith('images/')) {
+        imagePath = 'images/' + imagePath;
+      }
+    }
+    
     return `
       <div class="cart-item">
-        <img src="${item.image || 'images/default.jpg'}" alt="${item.name}" class="cart-item-image">
+        <img src="${imagePath}" alt="${item.name}" class="cart-item-image" onerror="this.src='images/placeholder.jpg'">
         
         <div class="cart-item-details">
           <div class="cart-item-name">${item.name}</div>
@@ -289,6 +299,11 @@ window.updateItemQuantity = function(index, change) {
   localStorage.setItem('cart', JSON.stringify(window.cart));
   window.renderCartItems();
   window.updateCartCount();
+  
+  // 顯示成功提示
+  if (typeof window.showSuccess === 'function') {
+    window.showSuccess(`已更新 ${window.cart[index].name} 數量`);
+  }
 };
 
 // ===== 移除商品 =====
@@ -431,6 +446,41 @@ window.loadAvailableCoupons = function() {
   });
 };
 
+// ===== 前往結帳頁面（從購物車頁面）=====
+window.goToCheckout = function() {
+  console.log('🛒 準備前往結帳頁面');
+  
+  // 檢查購物車是否為空
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  
+  if (cart.length === 0) {
+    if (typeof window.showError === 'function') {
+      window.showError('購物車是空的！');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('購物車是空的！', 'error');
+    }
+    return;
+  }
+  
+  // 檢查登入狀態（強制登入才能下單）
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('請先登入會員才能下單', 'error');
+    } else if (typeof window.showError === 'function') {
+      window.showError('請先登入會員才能下單');
+    }
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 1500);
+    return;
+  }
+  
+  // 門市選擇檢查已移至結帳頁面，這裡不再檢查
+  // 跳轉到結帳頁面
+  window.location.href = 'checkout.html';
+};
+
 // ===== 結帳（含付款方式、無運費）=====
 window.checkout = function() {
   console.log('🛒 開始結帳流程');
@@ -442,19 +492,21 @@ window.checkout = function() {
   if (!currentUser) {
     if (typeof window.showError === 'function') {
       window.showError('請先登入');
-    } else {
-      alert('請先登入');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('請先登入', 'error');
     }
-    localStorage.setItem('redirectAfterLogin', 'cart.html');
+    localStorage.setItem('redirectAfterLogin', 'checkout.html');
     setTimeout(() => window.location.href = 'login.html', 1500);
     return;
   }
   
-  if (window.cart.length === 0) {
+  // 檢查購物車是否為空
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  if (cart.length === 0) {
     if (typeof window.showError === 'function') {
-      window.showError('購物車是空的');
+      window.showError('購物車是空的！');
     } else {
-      alert('購物車是空的');
+      alert('購物車是空的！');
     }
     return;
   }
@@ -470,8 +522,8 @@ window.checkout = function() {
   if (!orderOptions.store) {
     if (typeof window.showError === 'function') {
       window.showError('請選擇取餐門市');
-    } else {
-      alert('請選擇取餐門市');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('請選擇取餐門市', 'error');
     }
     window.location.href = 'menu.html';
     return;
@@ -566,14 +618,20 @@ window.checkout = function() {
   window.cart = [];
   localStorage.setItem('cart', '[]');
   
-  if (typeof window.showSuccess === 'function') {
-    window.showSuccess('✅ 訂單已成功送出！');
-  } else {
-    alert('訂單已成功送出！');
+  // 更新購物車徽章
+  if (typeof window.updateCartCount === 'function') {
+    window.updateCartCount();
   }
   
+  if (typeof window.showSuccess === 'function') {
+    window.showSuccess('✅ 訂單已成功送出！');
+  } else if (typeof window.showToast === 'function') {
+    window.showToast('訂單已成功送出！', 'success');
+  }
+  
+  // 跳轉到訂單確認頁面（或個人資料頁面）
   setTimeout(() => {
-    window.location.href = 'checkout.html?orderId=' + order.id;
+    window.location.href = 'profile.html?orderId=' + order.id;
   }, 1000);
 };
 

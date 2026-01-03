@@ -256,4 +256,129 @@ if (document.readyState === 'loading') {
   window.showAnnouncement();
 }
 
+// ===== 通用管理 Modal =====
+window.showAdminModal = function(options = {}) {
+  const {
+    title = '管理操作',
+    content = '',
+    body = '', // 支援 body 參數（與 admin.js 一致）
+    footer = '', // 支援 footer 參數（與 admin.js 一致）
+    showCancel = true,
+    onConfirm = null,
+    onCancel = null
+  } = options;
+  
+  // 使用 body 或 content（body 優先）
+  const modalBody = body || content;
+  
+  // 檢查是否已存在 Modal（使用 admin.html 中的結構）
+  let modal = document.getElementById('adminModal');
+  let modalTitle = null;
+  let modalBodyEl = null;
+  let modalFooter = null;
+  
+  if (!modal) {
+    // 如果不存在，創建 Modal 結構
+    modal = document.createElement('div');
+    modal.id = 'adminModal';
+    modal.className = 'admin-modal';
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'admin-modal-overlay';
+    modalOverlay.onclick = () => {
+      window.closeAdminModal();
+      if (onCancel) onCancel();
+    };
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'admin-modal-content';
+    
+    const header = document.createElement('div');
+    header.className = 'admin-modal-header';
+    modalTitle = document.createElement('h2');
+    modalTitle.className = 'admin-modal-title';
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'admin-modal-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => {
+      window.closeAdminModal();
+      if (onCancel) onCancel();
+    };
+    header.appendChild(modalTitle);
+    header.appendChild(closeBtn);
+    
+    modalBodyEl = document.createElement('div');
+    modalBodyEl.className = 'admin-modal-body';
+    
+    modalFooter = document.createElement('div');
+    modalFooter.className = 'admin-modal-footer';
+    
+    modalContent.appendChild(header);
+    modalContent.appendChild(modalBodyEl);
+    modalContent.appendChild(modalFooter);
+    
+    modal.appendChild(modalOverlay);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+  } else {
+    // 使用現有的 Modal
+    modalTitle = modal.querySelector('.admin-modal-title');
+    modalBodyEl = modal.querySelector('.admin-modal-body');
+    modalFooter = modal.querySelector('.admin-modal-footer');
+    
+    // 更新遮罩點擊事件
+    const modalOverlay = modal.querySelector('.admin-modal-overlay');
+    if (modalOverlay) {
+      modalOverlay.onclick = () => {
+        window.closeAdminModal();
+        if (onCancel) onCancel();
+      };
+    }
+  }
+  
+  // 設置內容
+  if (modalTitle) modalTitle.textContent = title;
+  if (modalBodyEl) modalBodyEl.innerHTML = modalBody;
+  
+  // 設置 footer（如果提供）
+  if (footer) {
+    if (modalFooter) modalFooter.innerHTML = footer;
+  } else {
+    // 使用預設 footer
+    if (modalFooter) {
+      modalFooter.innerHTML = `
+        ${showCancel ? `<button class="admin-modal-btn admin-modal-btn-cancel" onclick="window.closeAdminModal()">取消</button>` : ''}
+        <button class="admin-modal-btn admin-modal-btn-confirm" onclick="window.confirmAdminModal()">確認</button>
+      `;
+    }
+  }
+  
+  // 儲存回呼函數
+  window._adminModalOnConfirm = onConfirm;
+  window._adminModalOnCancel = onCancel;
+  
+  // 顯示 Modal
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+// ===== 確認管理 Modal =====
+window.confirmAdminModal = function() {
+  if (window._adminModalOnConfirm) {
+    window._adminModalOnConfirm();
+  }
+  window.closeAdminModal();
+};
+
+// ===== 關閉管理 Modal =====
+window.closeAdminModal = function() {
+  const modal = document.getElementById('adminModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+  window._adminModalOnConfirm = null;
+  window._adminModalOnCancel = null;
+};
+
 console.log('✅ Utils.js loaded - All utility functions are available globally');

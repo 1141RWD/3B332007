@@ -329,7 +329,7 @@
       }
     }
   </style>
-    
+  <style>
     /* 美化結帳頁面 */
     .checkout-container {
       max-width: 1000px;
@@ -509,27 +509,84 @@
     .btn-secondary:hover {
       background: var(--soft-peach);
     }
+  </style>
 </head>
 <body>
-  <!-- 導覽列 -->
-  <nav class="navbar">
+  <!-- 導覽列（與 index.html 完全一致）-->
+  <nav class="navbar" id="navbar">
     <div class="navbar-container">
       <a href="index.html" class="navbar-logo">
         <div class="logo-icon">🌅</div>
         <div class="logo-text">
-          <div class="logo-name">晨光早餐店</div>
-          <div class="logo-slogan">Morning Light Breakfast</div>
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">MORNING GLORY</div>
         </div>
       </a>
       
-      <ul class="navbar-menu">
+      <button class="navbar-toggle" id="navbarToggle" aria-label="開啟選單">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="navbar-menu" id="navbarMenu">
         <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
         <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
-        <li><a href="cart.html" class="navbar-link active">🛒 購物車 <span class="cart-badge" id="cartBadge">0</span></a></li>
-        <li><a href="login.html" class="navbar-link">🔐 登入</a></li>
+        <li><div id="loginBtn" class="navbar-link"><a href="login.html">🔐 登入 / 註冊</a></div></li>
+        <li>
+          <a href="cart.html" class="navbar-link cart-link">
+            🛒 購物車
+            <span class="cart-badge" id="cartBadge">0</span>
+          </a>
+        </li>
       </ul>
     </div>
   </nav>
+  
+  <!-- 導覽列功能腳本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 導覽列切換功能
+      const navbarToggle = document.getElementById('navbarToggle');
+      const navbarMenu = document.getElementById('navbarMenu');
+      
+      if (navbarToggle && navbarMenu) {
+        navbarToggle.addEventListener('click', () => {
+          navbarToggle.classList.toggle('active');
+          navbarMenu.classList.toggle('active');
+        });
+        
+        const navbarLinks = document.querySelectorAll('.navbar-link');
+        navbarLinks.forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+              navbarToggle.classList.remove('active');
+              navbarMenu.classList.remove('active');
+            }
+          });
+        });
+      }
+      
+      // 更新購物車徽章
+      const updateCartBadge = () => {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const cartBadge = document.getElementById('cartBadge');
+        
+        if (cartBadge) {
+          const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+          cartBadge.textContent = totalItems;
+          cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+        }
+      };
+      
+      updateCartBadge();
+      
+      // 更新導覽列用戶顯示
+      if (typeof window.updateNavbarUser === 'function') {
+        window.updateNavbarUser();
+      }
+    });
+  </script>
 
   <!-- 結帳內容 -->
   <div class="checkout-container">
@@ -716,19 +773,26 @@
     let selectedPayment = 'cash';
 
     // 更新購物車徽章
-    function updateCartBadge() {
+    const updateCartBadge = () => {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       const badge = document.getElementById('cartBadge');
+      const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      
       if (badge) {
-        badge.textContent = cart.length;
+        badge.textContent = totalItems;
+        badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
       }
-    }
+    };
 
     // 更新用餐方式
-    function updateDiningOption() {
-      const takeout = document.getElementById('takeout').checked;
+    const updateDiningOption = () => {
+      const takeoutInput = document.getElementById('takeout');
       const takeoutOptions = document.getElementById('takeoutOptions');
       const dineinOptions = document.getElementById('dineinOptions');
+      
+      if (!takeoutInput || !takeoutOptions || !dineinOptions) return;
+      
+      const takeout = takeoutInput.checked;
       
       if (takeout) {
         takeoutOptions.style.display = 'block';
@@ -737,19 +801,23 @@
         takeoutOptions.style.display = 'none';
         dineinOptions.style.display = 'block';
       }
-    }
+    };
 
     // 更新取餐時間
-    function updatePickupType() {
-      const schedule = document.getElementById('schedule').checked;
+    const updatePickupType = () => {
+      const scheduleInput = document.getElementById('schedule');
       const scheduleOptions = document.getElementById('scheduleOptions');
       
-      scheduleOptions.style.display = schedule ? 'block' : 'none';
-    }
+      if (!scheduleInput || !scheduleOptions) return;
+      
+      scheduleOptions.style.display = scheduleInput.checked ? 'block' : 'none';
+    };
 
     // 生成時間選項
-    function generateTimeSlots() {
+    const generateTimeSlots = () => {
       const select = document.getElementById('pickupTime');
+      if (!select) return;
+      
       select.innerHTML = '';
       
       for (let hour = 6; hour <= 14; hour++) {
@@ -761,21 +829,23 @@
           select.appendChild(option);
         }
       }
-    }
+    };
 
     // 填充門市選項
-    function populateStores() {
+    const populateStores = () => {
       const select = document.getElementById('storeSelect');
+      if (!select || typeof stores === 'undefined') return;
+      
       stores.forEach(store => {
         const option = document.createElement('option');
         option.value = store.id;
         option.textContent = `${store.name} - ${store.address}`;
         select.appendChild(option);
       });
-    }
+    };
 
     // 顯示訂單商品
-    function displayOrderItems() {
+    const displayOrderItems = () => {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       const container = document.getElementById('orderItems');
       const totalElement = document.getElementById('totalAmount');
@@ -797,9 +867,10 @@
           <div class="summary-item">
             <div class="item-name">
               ${item.name} x${item.quantity}
+              ${item.note ? `<div style="font-size: 0.85rem; color: var(--dark-gray); margin-top: 0.25rem;">備註：${item.note}</div>` : ''}
               ${item.options && item.options.extras && item.options.extras.length > 0 
                 ? `<div style="font-size: 0.85rem; color: var(--dark-gray); margin-top: 0.25rem;">
-                     ${item.options.extras.map(e => e.name).join(', ')}
+                     ${item.options.extras.map(e => `${e.name} (+$${e.price || 0})`).join(', ')}
                    </div>` 
                 : ''}
             </div>
@@ -812,34 +883,68 @@
     }
 
     // 選擇付款方式
-    function selectPayment(method) {
+    const selectPayment = (method) => {
       selectedPayment = method;
       
       document.querySelectorAll('.payment-option').forEach(option => {
         option.classList.remove('selected');
       });
       
-      event.currentTarget.classList.add('selected');
-    }
+      const clickedElement = event?.currentTarget;
+      if (clickedElement) {
+        clickedElement.classList.add('selected');
+      }
+    };
 
     // 提交訂單
-    function submitOrder() {
-      const diningOption = document.querySelector('input[name="diningOption"]:checked').value;
-      const name = document.getElementById('customerName').value;
-      const phone = document.getElementById('customerPhone').value;
-      const storeId = document.getElementById('storeSelect').value;
+    const submitOrder = () => {
+      const diningOptionInput = document.querySelector('input[name="diningOption"]:checked');
+      if (!diningOptionInput) {
+        if (typeof window.showError === 'function') {
+          window.showError('請選擇用餐方式！');
+        } else {
+          alert('請選擇用餐方式！');
+        }
+        return;
+      }
+      
+      const diningOption = diningOptionInput.value;
+      const nameInput = document.getElementById('customerName');
+      const phoneInput = document.getElementById('customerPhone');
+      const storeSelect = document.getElementById('storeSelect');
+      
+      if (!nameInput || !phoneInput || !storeSelect) {
+        if (typeof window.showError === 'function') {
+          window.showError('表單元素載入失敗，請重新整理頁面');
+        } else {
+          alert('表單元素載入失敗，請重新整理頁面');
+        }
+        return;
+      }
+      
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const storeId = storeSelect.value;
       
       // 驗證必填欄位
       if (!name || !phone || !storeId) {
-        alert('請填寫所有必填欄位！');
+        if (typeof window.showError === 'function') {
+          window.showError('請填寫所有必填欄位！');
+        } else {
+          alert('請填寫所有必填欄位！');
+        }
         return;
       }
       
       // 內用需要桌號
       if (diningOption === 'dinein') {
-        const tableNumber = document.getElementById('tableNumber').value;
-        if (!tableNumber) {
-          alert('請選擇桌號！');
+        const tableNumberInput = document.getElementById('tableNumber');
+        if (!tableNumberInput || !tableNumberInput.value) {
+          if (typeof window.showError === 'function') {
+            window.showError('請選擇桌號！');
+          } else {
+            alert('請選擇桌號！');
+          }
           return;
         }
       }
@@ -847,52 +952,194 @@
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       
       if (cart.length === 0) {
-        alert('購物車是空的！');
+        if (typeof window.showError === 'function') {
+          window.showError('購物車是空的！');
+        } else {
+          alert('購物車是空的！');
+        }
         return;
       }
       
-      // 建立訂單
-      const order = {
-        id: 'ORDER-' + Date.now(),
-        status: 'pending',
-        items: cart,
-        customer: {
-          name: name,
-          phone: phone,
-          email: document.getElementById('customerEmail').value
-        },
-        diningOption: diningOption,
-        storeId: storeId,
-        payment: selectedPayment,
-        note: document.getElementById('orderNote').value,
-        createdAt: new Date().toISOString(),
-        total: parseInt(document.getElementById('totalAmount').textContent.replace('$', ''))
-      };
+      // 計算訂單總額
+      let subtotal = 0;
+      cart.forEach(item => {
+        let itemTotal = item.price * item.quantity;
+        if (item.options && item.options.extras) {
+          item.options.extras.forEach(extra => {
+            itemTotal += extra.price * item.quantity;
+          });
+        }
+        subtotal += itemTotal;
+      });
       
-      // 加入桌號或取餐時間
-      if (diningOption === 'dinein') {
-        order.tableNumber = document.getElementById('tableNumber').value;
-      } else {
-        const pickupType = document.querySelector('input[name="pickupType"]:checked').value;
-        order.pickupType = pickupType;
-        
-        if (pickupType === 'schedule') {
-          order.pickupDate = document.getElementById('pickupDate').value;
-          order.pickupTime = document.getElementById('pickupTime').value;
+      // 取得優惠券資訊（從購物車頁面傳遞或從 localStorage 讀取）
+      let couponCode = '';
+      let discount = 0;
+      const couponSelect = document.getElementById('couponSelect');
+      if (couponSelect && couponSelect.value) {
+        couponCode = couponSelect.value;
+        // 計算折扣金額
+        const coupons = JSON.parse(localStorage.getItem('coupons') || '[]');
+        const coupon = coupons.find(c => c.code === couponCode && c.active !== false);
+        if (coupon && subtotal >= (coupon.minAmount || 0)) {
+          if (coupon.type === 'percent') {
+            discount = Math.round(subtotal * (1 - coupon.discount));
+          } else if (coupon.type === 'fixed') {
+            discount = coupon.discount;
+          }
+          if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount;
+          }
         }
       }
       
-      // 儲存訂單
+      // 取得門市資訊
+      const selectedStore = stores.find(s => s.id === storeId);
+      
+      // 獲取當前用戶 Email（用於訂單同步）
+      let userEmail = document.getElementById('customerEmail').value || '';
+      const currentUser = typeof window.getCurrentUser === 'function' 
+        ? window.getCurrentUser() 
+        : JSON.parse(localStorage.getItem('currentUser') || 'null');
+      
+      if (currentUser && currentUser.email) {
+        userEmail = currentUser.email;
+      }
+      
+      // 建立訂單（格式與 admin.js 一致）
+      const order = {
+        id: 'ORD-' + Date.now(),
+        status: 'pending',
+        items: cart,
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: userEmail,
+        userEmail: userEmail, // 新增：用於會員中心過濾
+        userId: currentUser ? currentUser.email : null, // 新增：用於會員中心過濾
+        diningOption: diningOption === 'dinein' ? 'dine-in' : 'takeout',
+        storeId: storeId,
+        store: selectedStore ? selectedStore.name : '',
+        paymentMethod: selectedPayment,
+        note: document.getElementById('orderNote').value || '',
+        subtotal: subtotal,
+        deliveryFee: 0, // 無運費
+        discount: discount, // 優惠券折扣金額
+        couponCode: couponCode || null, // 使用的優惠券代碼
+        total: Math.max(0, subtotal - discount), // 總計 = 小計 - 折扣
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // 更新優惠券使用次數（如果有使用優惠券）
+      if (couponCode && currentUser && currentUser.email) {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userIndex = users.findIndex(u => u.email === currentUser.email);
+        if (userIndex > -1) {
+          if (!users[userIndex].usedCoupons) {
+            users[userIndex].usedCoupons = {};
+          }
+          users[userIndex].usedCoupons[couponCode] = (users[userIndex].usedCoupons[couponCode] || 0) + 1;
+          localStorage.setItem('users', JSON.stringify(users));
+          
+          // 更新 currentUser
+          if (!currentUser.usedCoupons) {
+            currentUser.usedCoupons = {};
+          }
+          currentUser.usedCoupons[couponCode] = users[userIndex].usedCoupons[couponCode];
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+      }
+      
+      // 加入桌號或取餐時間
+      if (diningOption === 'dinein') {
+        const tableNumber = document.getElementById('tableNumber').value;
+        if (tableNumber) {
+          order.tableNumber = tableNumber;
+        }
+      } else {
+        const pickupTypeInput = document.querySelector('input[name="pickupType"]:checked');
+        if (pickupTypeInput) {
+          order.pickupType = pickupTypeInput.value;
+          
+          if (pickupTypeInput.value === 'schedule') {
+            const pickupDate = document.getElementById('pickupDate');
+            const pickupTime = document.getElementById('pickupTime');
+            if (pickupDate) order.pickupDate = pickupDate.value;
+            if (pickupTime) order.pickupTime = pickupTime.value;
+          }
+        }
+      }
+      
+      // 儲存訂單到 localStorage（確保格式正確）
       const orders = JSON.parse(localStorage.getItem('orders') || '[]');
       orders.push(order);
       localStorage.setItem('orders', JSON.stringify(orders));
       
-      // 清空購物車
-      localStorage.removeItem('cart');
+      console.log('✅ 訂單已儲存:', order);
       
-      // 導向成功頁面
-      alert('訂單已送出！訂單編號：' + order.id);
-      window.location.href = 'profile.html';
+      // 清空購物車
+      localStorage.setItem('cart', '[]');
+      
+      // 更新購物車徽章
+      if (typeof window.updateCartCount === 'function') {
+        window.updateCartCount();
+      }
+      
+      // 顯示成功訊息並導向
+      if (typeof window.showSuccess === 'function') {
+        window.showSuccess(`訂單已送出！訂單編號：${order.id}`);
+        setTimeout(() => {
+          window.location.href = 'profile.html';
+        }, 1500);
+      } else {
+        alert('訂單已送出！訂單編號：' + order.id);
+        window.location.href = 'profile.html';
+      }
+    }
+
+    // ===== 自動帶入會員資料 =====
+    function autoFillUserInfo() {
+      try {
+        // 獲取當前用戶（兼容多種方式）
+        let currentUser = null;
+        
+        if (typeof window.getCurrentUser === 'function') {
+          currentUser = window.getCurrentUser();
+        } else {
+          const savedUser = localStorage.getItem('currentUser');
+          if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+          }
+        }
+        
+        if (currentUser) {
+          // 自動填入姓名
+          const nameInput = document.getElementById('customerName');
+          if (nameInput && currentUser.name) {
+            nameInput.value = currentUser.name;
+          }
+          
+          // 自動填入電話
+          const phoneInput = document.getElementById('customerPhone');
+          if (phoneInput && (currentUser.phone || currentUser.phoneNumber)) {
+            phoneInput.value = currentUser.phone || currentUser.phoneNumber || '';
+          }
+          
+          // 自動填入 Email
+          const emailInput = document.getElementById('customerEmail');
+          if (emailInput && currentUser.email) {
+            emailInput.value = currentUser.email;
+          }
+          
+          console.log('✅ 已自動填入會員資料:', {
+            name: currentUser.name,
+            phone: currentUser.phone || currentUser.phoneNumber,
+            email: currentUser.email
+          });
+        }
+      } catch (error) {
+        console.error('❌ 自動填入會員資料失敗:', error);
+      }
     }
 
     // 初始化
@@ -901,6 +1148,14 @@
       generateTimeSlots();
       populateStores();
       displayOrderItems();
+      
+      // 自動帶入會員資料
+      autoFillUserInfo();
+      
+      // 確保購物車在頁面載入時正確顯示
+      if (typeof window.initShoppingCart === 'function') {
+        window.initShoppingCart();
+      }
     });
   </script>
 </body>

@@ -23,6 +23,26 @@ function updateCartBadge() {
   }
 }
 
+// ===== 獲取當前用戶（兼容多種方式）=====
+function getCurrentUser() {
+  // 優先使用 window.getCurrentUser（如果存在）
+  if (typeof window.getCurrentUser === 'function') {
+    return window.getCurrentUser();
+  }
+  
+  // 從 localStorage 讀取
+  try {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      return JSON.parse(savedUser);
+    }
+  } catch (error) {
+    console.error('讀取用戶資料失敗:', error);
+  }
+  
+  return null;
+}
+
 // ===== 頁面載入時初始化 =====
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
@@ -30,14 +50,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // 如果已登入，自動填入使用者資訊
   const currentUser = getCurrentUser();
   if (currentUser) {
-    document.getElementById('userName').value = currentUser.name || '';
-    document.getElementById('userEmail').value = currentUser.email || '';
-    document.getElementById('userPhone').value = currentUser.phone || '';
+    const userNameInput = document.getElementById('userName');
+    const userEmailInput = document.getElementById('userEmail');
+    const userPhoneInput = document.getElementById('userPhone');
+    
+    if (userNameInput) {
+      userNameInput.value = currentUser.name || '';
+    }
+    if (userEmailInput) {
+      userEmailInput.value = currentUser.email || '';
+    }
+    if (userPhoneInput) {
+      userPhoneInput.value = currentUser.phone || currentUser.phoneNumber || '';
+    }
+    
+    console.log('✅ 已自動填入用戶資料:', {
+      name: currentUser.name,
+      email: currentUser.email,
+      phone: currentUser.phone || currentUser.phoneNumber
+    });
   }
   
   // 表單提交處理
   const contactForm = document.getElementById('contactForm');
-  contactForm.addEventListener('submit', handleSubmit);
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleSubmit);
+  }
 });
 
 // ===== 處理表單提交 =====
@@ -64,14 +102,22 @@ function handleSubmit(event) {
   
   // 驗證資料
   if (!formData.userName || !formData.userEmail || !formData.subject || !formData.message) {
-    alert('請填寫所有必填欄位！');
+    if (typeof window.showError === 'function') {
+      window.showError('請填寫所有必填欄位！');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('請填寫所有必填欄位！', 'error');
+    }
     return;
   }
   
   // 驗證 Email 格式
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(formData.userEmail)) {
-    alert('請輸入有效的 Email 地址！');
+    if (typeof window.showError === 'function') {
+      window.showError('請輸入有效的 Email 地址！');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('請輸入有效的 Email 地址！', 'error');
+    }
     return;
   }
   
@@ -95,9 +141,13 @@ function handleSubmit(event) {
     // 如果已登入，重新填入使用者資訊
     const currentUser = getCurrentUser();
     if (currentUser) {
-      document.getElementById('userName').value = currentUser.name || '';
-      document.getElementById('userEmail').value = currentUser.email || '';
-      document.getElementById('userPhone').value = currentUser.phone || '';
+      const userNameInput = document.getElementById('userName');
+      const userEmailInput = document.getElementById('userEmail');
+      const userPhoneInput = document.getElementById('userPhone');
+      
+      if (userNameInput) userNameInput.value = currentUser.name || '';
+      if (userEmailInput) userEmailInput.value = currentUser.email || '';
+      if (userPhoneInput) userPhoneInput.value = currentUser.phone || currentUser.phoneNumber || '';
     }
     
     // 3秒後隱藏成功訊息
@@ -114,7 +164,11 @@ function handleSubmit(event) {
     
   } catch (error) {
     console.error('儲存訊息時發生錯誤：', error);
-    alert('送出訊息時發生錯誤，請稍後再試。');
+    if (typeof window.showError === 'function') {
+      window.showError('送出訊息時發生錯誤，請稍後再試。');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast('送出訊息時發生錯誤，請稍後再試。', 'error');
+    }
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
   }

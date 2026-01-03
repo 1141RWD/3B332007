@@ -74,9 +74,24 @@
     /* 商品網格 */
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: var(--spacing-lg);
       margin-bottom: var(--spacing-xl);
+    }
+    
+    /* 手機版適配 */
+    @media (max-width: 768px) {
+      .menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: var(--spacing-md);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .menu-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+      }
     }
     
     .menu-card {
@@ -182,15 +197,23 @@
       align-items: center;
       justify-content: center;
       gap: var(--spacing-xs);
+      user-select: none;
     }
     
     .menu-add-btn:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
+      background: linear-gradient(135deg, var(--accent-red), var(--primary-orange));
     }
     
     .menu-add-btn:active {
       transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .menu-add-btn:focus {
+      outline: 2px solid var(--primary-orange);
+      outline-offset: 2px;
     }
     
     /* 商品標籤 */
@@ -552,16 +575,19 @@
     /* 響應式調整 */
     @media (max-width: 768px) {
       .menu-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: var(--spacing-md);
       }
       
       .category-filter {
         gap: 0.5rem;
+        flex-wrap: wrap;
       }
       
       .filter-btn {
         font-size: 0.9rem;
         padding: 0.6rem 1rem;
+        min-height: 44px; /* 確保觸控區域足夠大 */
       }
       
       .options-grid {
@@ -574,6 +600,17 @@
       
       .search-input {
         font-size: 0.95rem;
+      }
+      
+      .menu-add-btn {
+        min-height: 44px; /* 確保觸控區域足夠大 */
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .menu-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
       }
     }
   </style>
@@ -622,73 +659,7 @@
       </p>
     </div>
 
-    <!-- 門市選擇與預約 -->
-    <div class="order-options fade-in" style="background: var(--white); padding: var(--spacing-md); border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin-bottom: var(--spacing-xl);">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
-        <!-- 選擇門市 -->
-        <div>
-          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🏪 選擇門市</label>
-          <select id="storeSelect" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
-            <option value="">請選擇門市...</option>
-          </select>
-        </div>
-        
-        <!-- 用餐方式 -->
-        <div>
-          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🍽️ 用餐方式</label>
-          <select id="diningOption" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
-            <option value="takeout">📦 外帶</option>
-            <option value="dine-in">🍽️ 內用</option>
-          </select>
-        </div>
-
-        <!-- 桌號選擇（僅內用顯示） -->
-        <div id="tableOptions" style="display: none; margin-top: var(--spacing-md);">
-          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🪑 桌號選擇</label>
-          <select id="tableSelect" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
-            <option value="">請選擇桌號</option>
-            <option value="A1">A1 桌（2人桌）</option>
-            <option value="A2">A2 桌（2人桌）</option>
-            <option value="A3">A3 桌（2人桌）</option>
-            <option value="B1">B1 桌（2人桌）</option>
-            <option value="B2">B2 桌（2人桌）</option>
-            <option value="B3">B3 桌（2人桌）</option>
-            <option value="C1">C1 桌（2人桌）</option>
-            <option value="C2">C2 桌（2人桌）</option>
-            <option value="C3">C3 桌（2人桌）</option>
-            <option value="D1">D1 桌（4人桌）</option>
-            <option value="D2">D2 桌（4人桌）</option>
-            <option value="D3">D3 桌（4人桌）</option>
-            <option value="E1">E1 桌（6人桌）</option>
-            <option value="E2">E2 桌（6人桌）</option>
-            <option value="VIP">VIP 包廂</option>
-          </select>
-        </div>
-        
-        <!-- 取餐方式（僅外帶顯示） -->
-        <div id="pickupTypeOptions" style="display: none; margin-top: var(--spacing-md);">
-          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">🕒 取餐方式</label>
-          <select id="pickupType" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-size: 1rem;">
-            <option value="now">立即取餐</option>
-            <option value="schedule">預約取餐</option>
-          </select>
-        </div>
-        
-        <!-- 預約時間（僅外帶且選擇預約時顯示） -->
-        <div id="scheduleOptions" style="display: none; margin-top: var(--spacing-md);">
-          <label style="font-weight: 700; display: block; margin-bottom: var(--spacing-xs);">⏰ 預約時間</label>
-          <div style="display: flex; gap: var(--spacing-xs);">
-            <select id="pickupDate" style="flex: 1; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm);">
-              <option value="today">今天</option>
-              <option value="tomorrow">明天</option>
-            </select>
-            <select id="pickupTime" style="flex: 1; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm);">
-              <!-- 動態生成 -->
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- 門市選擇與預約已移至結帳頁面 -->
 
     <!-- 搜尋列 -->
     <div class="search-container fade-in" style="margin-bottom: var(--spacing-lg);">
@@ -750,6 +721,18 @@
           </div>
         </div>
         
+        <!-- 餐點備註 -->
+        <div class="options-section" style="margin-bottom: var(--spacing-lg);">
+          <h3 class="options-title">📝 餐點備註（選填）</h3>
+          <textarea 
+            id="itemNote" 
+            class="form-input" 
+            rows="3" 
+            placeholder="有什麼特殊需求嗎？例如：去洋蔥、不要香菜、少鹽..."
+            style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem; resize: vertical;"
+          ></textarea>
+        </div>
+        
         <!-- 加入購物車按鈕 -->
         <button class="add-to-cart-btn" id="addToCartBtn">
           🛒 加入購物車
@@ -788,10 +771,6 @@
         <div class="footer-info">
           <span class="footer-info-icon">⏰</span>
           <span>週一至週日 06:00 - 14:00</span>
-        </div>
-        <div class="footer-info">
-          <span class="footer-info-icon">🚚</span>
-          <span>外送服務：滿 $300 免運費</span>
         </div>
       </div>
       

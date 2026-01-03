@@ -15,37 +15,79 @@
   <script src="js/coupon-system.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/shop.js"></script>
+  <script src="js/cart.js"></script>
 </head>
 <body class="cart-page">
-  <!-- 導覽列（與 index.html 一致）-->
-  <nav class="navbar">
+  <!-- 導覽列（與 index.html 完全一致）-->
+  <nav class="navbar" id="navbar">
     <div class="navbar-container">
-      <a href="index.html" class="navbar-brand">
-        <span class="brand-icon">☀️</span>
-        <span class="brand-text">晨光早餐店</span>
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">🌅</div>
+        <div class="logo-text">
+          <div class="logo-title">晨光早餐店</div>
+          <div class="logo-subtitle">MORNING GLORY</div>
+        </div>
       </a>
       
-      <ul class="navbar-menu">
-        <li><a href="index.html">首頁</a></li>
-        <li><a href="menu.html">線上點餐</a></li>
-        <li><a href="stores.html">門市查詢</a></li>
-        <li><a href="contact.html">聯絡我們</a></li>
-        
-        <!-- 購物車按鈕（用戶選單左邊）-->
+      <button class="navbar-toggle" id="navbarToggle" aria-label="開啟選單">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="navbar-link">🏠 首頁</a></li>
+        <li><a href="menu.html" class="navbar-link">🍳 線上點餐</a></li>
+        <li><div id="loginBtn" class="navbar-link"><a href="login.html">🔐 登入 / 註冊</a></div></li>
         <li>
-          <a href="cart.html" class="navbar-cart active">
+          <a href="cart.html" class="navbar-link cart-link active">
             🛒 購物車
-            <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
+            <span class="cart-badge" id="cartBadge">0</span>
           </a>
-        </li>
-        
-        <!-- 用戶選單（最右邊）-->
-        <li class="navbar-user">
-          <a href="login.html" id="navbarUserLink">🔐 登入 / 註冊</a>
         </li>
       </ul>
     </div>
   </nav>
+  
+  <!-- 導覽列功能腳本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 導覽列切換功能
+      const navbarToggle = document.getElementById('navbarToggle');
+      const navbarMenu = document.getElementById('navbarMenu');
+      
+      if (navbarToggle && navbarMenu) {
+        navbarToggle.addEventListener('click', () => {
+          navbarToggle.classList.toggle('active');
+          navbarMenu.classList.toggle('active');
+        });
+        
+        const navbarLinks = document.querySelectorAll('.navbar-link');
+        navbarLinks.forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+              navbarToggle.classList.remove('active');
+              navbarMenu.classList.remove('active');
+            }
+          });
+        });
+      }
+      
+      // 更新購物車徽章
+      const updateCartBadge = () => {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const cartBadge = document.getElementById('cartBadge');
+        
+        if (cartBadge) {
+          const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+          cartBadge.textContent = totalItems;
+          cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+        }
+      };
+      
+      updateCartBadge();
+    });
+  </script>
 
   <!-- 購物車主要內容 -->
   <div class="cart-container">
@@ -55,31 +97,34 @@
       <p>檢查您的美味選擇</p>
     </div>
 
-    <!-- 購物車內容 -->
+    <!-- 購物車內容（左右兩欄式設計）-->
     <div class="cart-content">
-      <!-- 左側：商品列表 -->
+      <!-- 左側：商品列表（佔 70%）-->
       <div class="cart-items-section">
         <div class="cart-items-header">
           <span id="cartItemsCount">您的餐點</span>
         </div>
 
-        <!-- 空購物車狀態 -->
+        <!-- 空購物車狀態（優化版）-->
         <div id="emptyCart" class="empty-cart" style="display: none;">
           <div class="empty-cart-icon">🛒</div>
-          <h2>購物車還空空的喔~</h2>
-          <p>快去挑選美味的早餐，開啟美好的一天！</p>
+          <h2>購物車目前是空的，肚子餓了嗎？</h2>
+          <p style="color: var(--dark-gray); margin-bottom: 2rem; font-size: 1.1rem;">
+            快來挑選美味的早餐，開啟美好的一天！<br>
+            我們有各式各樣的蛋餅、漢堡、吐司和飲料等著您～
+          </p>
           <a href="menu.html" class="go-shopping-btn">🍳 前往點餐</a>
         </div>
 
-        <!-- 購物車商品列表（保留此 ID）-->
+        <!-- 購物車商品列表（由 JavaScript 動態生成）-->
         <div id="cartItems"></div>
       </div>
 
-      <!-- 右側：結帳摘要（桌面版）-->
+      <!-- 右側：訂單摘要卡片（佔 30%）-->
       <div id="cartSummary" class="cart-summary" style="display: none;">
         <h2 class="summary-title">💰 訂單摘要</h2>
 
-        <!-- 折價券選擇（保留此區塊）-->
+        <!-- 折價券選擇 -->
         <div class="coupon-section">
           <label for="couponSelect" class="coupon-label">🎫 使用折價券</label>
           <select id="couponSelect" class="coupon-select" onchange="window.calculateTotal()">
@@ -99,29 +144,7 @@
           </div>
         </div>
 
-        <!-- 付款方式選擇（保留此區塊）-->
-        <div class="payment-section">
-          <label class="payment-label">💳 付款方式</label>
-          <div class="payment-methods">
-            <label class="payment-option">
-              <input type="radio" name="paymentMethod" value="cash" checked>
-              <span class="payment-icon">💵</span>
-              <span class="payment-text">現金付款</span>
-            </label>
-            <label class="payment-option">
-              <input type="radio" name="paymentMethod" value="linepay">
-              <span class="payment-icon">💚</span>
-              <span class="payment-text">Line Pay</span>
-            </label>
-            <label class="payment-option">
-              <input type="radio" name="paymentMethod" value="applepay">
-              <span class="payment-icon">🍎</span>
-              <span class="payment-text">Apple Pay</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- 金額明細（無運費）-->
+        <!-- 金額明細 -->
         <div class="summary-row">
           <span>小計</span>
           <span id="cartSubtotal">$0</span>
@@ -136,8 +159,8 @@
         </div>
 
         <!-- 結帳按鈕 -->
-        <button onclick="window.checkout()" class="checkout-btn">
-          <span style="position: relative; z-index: 1;">🛒 確認結帳</span>
+        <button onclick="window.goToCheckout()" class="checkout-btn" id="checkoutButton">
+          <span style="position: relative; z-index: 1;">🛒 前往結帳</span>
         </button>
 
         <a href="menu.html" class="continue-shopping">
@@ -147,18 +170,7 @@
     </div>
   </div>
 
-  <!-- 手機版固定底部結帳按鈕（保留此區塊）-->
-  <div id="mobileCheckoutFooter" class="mobile-checkout-footer" style="display: none;">
-    <div class="mobile-checkout-content">
-      <div class="mobile-total">
-        <div class="mobile-total-label">總計金額</div>
-        <div class="mobile-total-amount" id="mobileCartTotal">$0</div>
-      </div>
-      <button onclick="window.checkout()" class="mobile-checkout-btn">
-        結帳 →
-      </button>
-    </div>
-  </div>
+  <!-- 手機版固定底部結帳按鈕已移除（避免遮擋內容）-->
 
   <!-- 頁尾（簡化美化版，與 index.html 一致）-->
   <footer class="footer">
@@ -195,6 +207,24 @@
       <p>&copy; 2024 晨光早餐店 Morning Glory Breakfast. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- 編輯商品 Modal -->
+  <div id="editItemModal" class="edit-modal" style="display: none;">
+    <div class="edit-modal-overlay" onclick="window.closeEditModal()"></div>
+    <div class="edit-modal-content">
+      <div class="edit-modal-header">
+        <h2 class="edit-modal-title">✏️ 編輯商品</h2>
+        <button class="edit-modal-close" onclick="window.closeEditModal()">&times;</button>
+      </div>
+      <div class="edit-modal-body" id="editModalBody">
+        <!-- 動態生成編輯表單 -->
+      </div>
+      <div class="edit-modal-footer">
+        <button class="edit-modal-btn-cancel" onclick="window.closeEditModal()">取消</button>
+        <button class="edit-modal-btn-save" onclick="window.saveEditItem()">💾 儲存變更</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 初始化購物車頁面 -->
   <script>

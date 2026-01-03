@@ -14,6 +14,7 @@ function initCoupons() {
         featured: true,
         minAmount: 0,
         maxDiscount: null,
+        pointCost: 0, // 免費券
         createdAt: new Date().toISOString()
       },
       {
@@ -26,6 +27,7 @@ function initCoupons() {
         featured: false,
         minAmount: 500,
         maxDiscount: null,
+        pointCost: 0, // 免費券
         createdAt: new Date().toISOString()
       }
     ];
@@ -69,6 +71,8 @@ function addCoupon(couponData) {
     featured: couponData.featured || false,
     minAmount: parseInt(couponData.minAmount) || 0,
     maxDiscount: couponData.maxDiscount ? parseInt(couponData.maxDiscount) : null,
+    pointCost: parseInt(couponData.pointCost) || 0, // 兌換所需點數（0 代表免費/公開）
+    usageLimit: couponData.usageLimit ? parseInt(couponData.usageLimit) : null, // 每人限用次數（null 代表無限制）
     createdAt: new Date().toISOString()
   };
   
@@ -115,7 +119,7 @@ function setFeaturedCoupon(code) {
 }
 
 // 驗證折價券
-function validateCoupon(code, orderAmount) {
+function validateCoupon(code, orderAmount, userId = null) {
   const coupons = getAllCoupons();
   const coupon = coupons.find(c => c.code.toUpperCase() === code.toUpperCase());
   
@@ -127,8 +131,26 @@ function validateCoupon(code, orderAmount) {
     return { valid: false, message: '折價券已停用' };
   }
   
-  if (orderAmount < coupon.minAmount) {
+  if (orderAmount < (coupon.minAmount || 0)) {
     return { valid: false, message: `需滿 $${coupon.minAmount} 才能使用` };
+  }
+  
+  // 檢查使用次數限制
+  if (userId && coupon.usageLimit) {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(u => u.email === userId);
+    
+    if (user) {
+      // 初始化 usedCoupons
+      if (!user.usedCoupons) {
+        user.usedCoupons = {};
+      }
+      
+      const usedCount = user.usedCoupons[coupon.code] || 0;
+      if (usedCount >= coupon.usageLimit) {
+        return { valid: false, message: `此折價券已達使用上限（${coupon.usageLimit}次）` };
+      }
+    }
   }
   
   return { valid: true, coupon: coupon };
@@ -236,6 +258,67 @@ function getUserAvailableCoupons(userId) {
     })
     .filter(c => c !== null && c.active);
 }
+
+// ===== 取得所有可用折價券（公開券 + 可兌換券）=====
+window.getAvailableCoupons = function(userPoints = 0) {
+  const allCoupons = getAllCoupons();
+  const activeCoupons = allCoupons.filter(c => c.active);
+  
+  // 公開券（pointCost === 0）和可兌換券（pointCost > 0 且用戶點數足夠）
+  return activeCoupons.filter(c => {
+    const pointCost = c.pointCost || 0;
+    return pointCost === 0 || (pointCost > 0 && userPoints >= pointCost);
+  });
+};
+
+// ===== 取得可兌換的折價券（pointCost > 0 且 active）=====
+window.getExchangeableCoupons = function() {
+  const allCoupons = getAllCoupons();
+  return allCoupons.filter(c => {
+    const pointCost = c.pointCost || 0;
+    return c.active && pointCost > 0;
+  });
+};
+
+// ===== 驗證折價券（檢查是否過期或未達低消）=====
+window.validateCoupon = function(code, cartTotal) {
+  const coupons = getAllCoupons();
+  const coupon = coupons.find(c => c.code.toUpperCase() === code.toUpperCase());
+  
+  if (!coupon) {
+    return { valid: false, message: '折價券不存在' };
+  }
+  
+  if (!coupon.active) {
+    return { valid: false, message: '折價券已停用' };
+  }
+  
+  if (cartTotal < (coupon.minAmount || 0)) {
+    return { valid: false, message: `需滿 $${coupon.minAmount} 才能使用` };
+  }
+  
+  return { valid: true, coupon: coupon };
+};
+
+// ===== 計算折扣金額 =====
+window.calculateDiscount = function(coupon, cartTotal) {
+  let discount = 0;
+  
+  if (coupon.type === 'percent') {
+    // 百分比折扣
+    discount = Math.round(cartTotal * (1 - coupon.discount));
+  } else if (coupon.type === 'fixed') {
+    // 固定金額折扣
+    discount = coupon.discount;
+  }
+  
+  // 檢查最大折扣限制
+  if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+    discount = coupon.maxDiscount;
+  }
+  
+  return discount;
+};
 
 // 初始化系統
 initCoupons();

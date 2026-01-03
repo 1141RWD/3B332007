@@ -29,7 +29,7 @@ function addContactMessage(userId, userName, content) {
     userName: userName,
     content: content,
     reply: '',
-    status: 'Pending',
+    status: 'pending', // 統一使用小寫
     timestamp: new Date().toISOString()
   };
   
@@ -46,9 +46,11 @@ function replyToMessage(messageId, replyContent) {
   
   if (messageIndex !== -1) {
     messages[messageIndex].reply = replyContent;
-    messages[messageIndex].status = 'Replied';
+    messages[messageIndex].status = 'replied'; // 統一使用小寫
     messages[messageIndex].repliedAt = new Date().toISOString();
     
+    // 同時更新 contactMessages（如果存在）
+    localStorage.setItem('contactMessages', JSON.stringify(messages));
     localStorage.setItem('contact_messages', JSON.stringify(messages));
     return true;
   }
@@ -59,14 +61,20 @@ function replyToMessage(messageId, replyContent) {
 // ===== 取得待處理訊息數量 =====
 function getPendingMessagesCount() {
   const messages = getAllContactMessages();
-  return messages.filter(msg => msg.status === 'Pending').length;
+  // 統一使用小寫狀態判斷
+  return messages.filter(msg => {
+    const status = (msg.status || '').toLowerCase();
+    return status === 'pending';
+  }).length;
 }
 
 // ===== 刪除訊息 =====
 function deleteContactMessage(messageId) {
   let messages = getAllContactMessages();
   messages = messages.filter(msg => msg.id !== messageId);
+  // 同時更新兩個 localStorage key
   localStorage.setItem('contact_messages', JSON.stringify(messages));
+  localStorage.setItem('contactMessages', JSON.stringify(messages));
   return true;
 }
 

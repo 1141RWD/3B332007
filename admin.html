@@ -370,6 +370,7 @@
       <button class="admin-tab active" onclick="switchTab('orders')">📦 訂單管理</button>
       <button class="admin-tab" onclick="switchTab('members')">👥 會員管理</button>
       <button class="admin-tab" onclick="switchTab('products')">🛍️ 商品管理</button>
+      <button class="admin-tab" onclick="switchTab('coupons')">🎫 折價券管理</button>
       <button class="admin-tab" onclick="switchTab('messages')">💬 客服訊息</button>
     </div>
 
@@ -400,15 +401,36 @@
       </div>
     </div>
 
+    <!-- 折價券管理面板 -->
+    <div id="couponsPanel" class="admin-panel">
+      <!-- 內容由 JS 動態生成 -->
+    </div>
+
     <!-- 客服訊息面板 -->
     <div id="messagesPanel" class="admin-panel">
       <h2>💬 客服訊息管理</h2>
       <div id="adminContactMessagesPanel">
         <!-- 客服訊息列表將由 JS 動態生成 -->
       </div>
-      <h2>💬 客服訊息管理</h2>
       <div class="data-table" id="messagesTable">
         <p style="text-align: center; padding: 2rem;">載入中...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通用管理 Modal -->
+  <div id="adminModal" class="admin-modal" style="display: none;">
+    <div class="admin-modal-overlay" onclick="window.closeAdminModal()"></div>
+    <div class="admin-modal-content">
+      <div class="admin-modal-header">
+        <h2 class="admin-modal-title" id="adminModalTitle">管理操作</h2>
+        <button class="admin-modal-close" onclick="window.closeAdminModal()">&times;</button>
+      </div>
+      <div class="admin-modal-body" id="adminModalBody">
+        <!-- 動態生成內容 -->
+      </div>
+      <div class="admin-modal-footer" id="adminModalFooter">
+        <!-- 動態生成按鈕 -->
       </div>
     </div>
   </div>

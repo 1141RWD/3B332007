@@ -10,9 +10,15 @@ function renderAdminContactMessages() {
   
   const allMessages = getAllContactMessages();
   
-  // 分類訊息
-  const pendingMessages = allMessages.filter(m => m.status === 'Pending');
-  const repliedMessages = allMessages.filter(m => m.status === 'Replied');
+  // 分類訊息（統一使用小寫狀態）
+  const pendingMessages = allMessages.filter(m => {
+    const status = (m.status || '').toLowerCase();
+    return status === 'pending';
+  });
+  const repliedMessages = allMessages.filter(m => {
+    const status = (m.status || '').toLowerCase();
+    return status === 'replied';
+  });
   
   // 排序：按時間倒序
   pendingMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -210,11 +216,19 @@ function handleAdminReply(messageId) {
           showSuccess('回覆已送出！訊息已移至歷史紀錄');
           renderAdminContactMessages();
           updateAdminStats();
+          // 強制更新統計
+          if (typeof initStats === 'function') {
+            initStats();
+          }
         }, 500);
       } else {
         showSuccess('回覆已送出！');
         renderAdminContactMessages();
         updateAdminStats();
+        // 強制更新統計
+        if (typeof initStats === 'function') {
+          initStats();
+        }
       }
     } else {
       showError('回覆失敗，請重試');

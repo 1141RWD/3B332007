@@ -230,16 +230,24 @@ navbarLinks.forEach(link => {
 });
 
 // ===== 更新購物車徽章 =====
-function updateCartBadge() {
+const updateCartBadge = () => {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const cartBadge = document.getElementById('cartBadge');
+  const cartCountElements = document.querySelectorAll('.cart-count, .cart-badge');
+  
+  const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
   
   if (cartBadge) {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartBadge.textContent = totalItems;
-    cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    cartBadge.style.display = totalItems > 0 ? 'inline-block' : 'none';
   }
-}
+  
+  // 更新所有購物車徽章元素
+  cartCountElements.forEach(element => {
+    element.textContent = totalItems;
+    element.style.display = totalItems > 0 ? 'inline-block' : 'none';
+  });
+};
 
 // ===== 滾動效果 =====
 let lastScroll = 0;
@@ -362,10 +370,20 @@ function displayProductsFromArray(productsArray) {
          </div>`
       : '';
     
+    // 處理圖片路徑（確保相對路徑正確）
+    let imagePath = product.image || 'images/placeholder.jpg';
+    // 如果圖片路徑不是以 http 或 / 開頭，確保是相對路徑
+    if (!imagePath.startsWith('http') && !imagePath.startsWith('/')) {
+      // 確保路徑以 images/ 開頭
+      if (!imagePath.startsWith('images/')) {
+        imagePath = 'images/' + imagePath;
+      }
+    }
+    
     return `
       <div class="menu-card fade-in" data-product-id="${product.id}">
         <div class="menu-image-wrapper">
-          <img src="${product.image}" alt="${product.name}" class="menu-image" onerror="this.src='images/placeholder.jpg'">
+          <img src="${imagePath}" alt="${product.name}" class="menu-image" onerror="this.src='images/placeholder.jpg'">
           <span class="menu-category-badge">${product.category}</span>
         </div>
         <div class="menu-content">
@@ -424,39 +442,112 @@ function setupCategoryFilter() {
 }
 
 // ===== 開啟商品詳情彈窗 =====
-function openProductModal(productId) {
+// ===== 全域變數：編輯模式 =====
+let editingCartIndex = null;
+
+// ===== 開啟商品 Modal（支援編輯模式）=====
+window.openProductModal = function(productId, cartIndex = null) {
   currentProduct = products.find(p => p.id === productId);
   if (!currentProduct) return;
   
-  // 重置選項
-  quantity = 1;
-  selectedOptions = {
-    extras: [],
-    sweetness: null,
-    ice: null
-  };
+  editingCartIndex = cartIndex;
   
-  // 填充彈窗內容
-  document.getElementById('modalImage').src = currentProduct.image;
-  document.getElementById('modalImage').alt = currentProduct.name;
-  document.getElementById('modalTitle').textContent = currentProduct.name;
-  document.getElementById('modalDescription').textContent = currentProduct.description;
-  document.getElementById('modalPrice').textContent = `$${currentProduct.price}`;
-  document.getElementById('quantityValue').textContent = quantity;
+  // 如果是編輯模式，載入購物車項目的資料
+  if (cartIndex !== null) {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const cartItem = cart[cartIndex];
+    
+    if (cartItem) {
+      quantity = cartItem.quantity || 1;
+      selectedOptions = cartItem.options ? JSON.parse(JSON.stringify(cartItem.options)) : {
+        extras: [],
+        sweetness: null,
+        ice: null
+      };
+    } else {
+      // 如果找不到項目，重置
+      quantity = 1;
+      selectedOptions = {
+        extras: [],
+        sweetness: null,
+        ice: null
+      };
+    }
+  } else {
+    // 新增模式：重置選項
+    quantity = 1;
+    selectedOptions = {
+      extras: [],
+      sweetness: null,
+      ice: null
+    };
+  }
   
-  // 生成選項
+  // 填充彈窗內容（添加 DOM 檢查）
+  const modalImage = document.getElementById('modalImage');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDescription = document.getElementById('modalDescription');
+  const modalPrice = document.getElementById('modalPrice');
+  const quantityValueEl = document.getElementById('quantityValue');
+  const productModalEl = document.getElementById('productModal');
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  const itemNoteEl = document.getElementById('itemNote');
+  
+  if (modalImage) {
+    modalImage.src = currentProduct.image;
+    modalImage.alt = currentProduct.name;
+  }
+  if (modalTitle) {
+    modalTitle.textContent = cartIndex !== null ? '✏️ 修改餐點內容' : currentProduct.name;
+  }
+  if (modalDescription) modalDescription.textContent = currentProduct.description;
+  if (modalPrice) modalPrice.textContent = `$${currentProduct.price}`;
+  if (quantityValueEl) quantityValueEl.textContent = quantity;
+  
+  // 更新按鈕文字
+  if (addToCartBtn) {
+    addToCartBtn.textContent = cartIndex !== null ? '✅ 確認修改' : '🛒 加入購物車';
+  }
+  
+  // 載入備註（如果有）
+  if (itemNoteEl && cartIndex !== null) {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const cartItem = cart[cartIndex];
+    if (cartItem && cartItem.note) {
+      itemNoteEl.value = cartItem.note;
+    } else {
+      itemNoteEl.value = '';
+    }
+  } else if (itemNoteEl) {
+    itemNoteEl.value = '';
+  }
+  
+  // 生成選項（會自動回填已選選項）
   generateOptions();
   
   // 顯示彈窗
-  document.getElementById('productModal').classList.add('active');
-  document.body.style.overflow = 'hidden'; // 防止背景滾動
-}
+  if (productModalEl) {
+    productModalEl.classList.add('active');
+    document.body.style.overflow = 'hidden'; // 防止背景滾動
+  }
+};
+
+// ===== 保留原函數以向後兼容 =====
+const openProductModal = (productId) => {
+  window.openProductModal(productId, null);
+};
 
 // ===== 關閉彈窗 =====
-function closeProductModal() {
-  document.getElementById('productModal').classList.remove('active');
-  document.body.style.overflow = ''; // 恢復滾動
-}
+const closeProductModal = () => {
+  const productModalEl = document.getElementById('productModal');
+  if (productModalEl) {
+    productModalEl.classList.remove('active');
+    document.body.style.overflow = ''; // 恢復滾動
+  }
+  // 重置編輯模式
+  editingCartIndex = null;
+  currentProduct = null;
+};
 
 // ===== 生成商品選項 =====
 function generateOptions() {
@@ -465,11 +556,16 @@ function generateOptions() {
   
   // 如果有 extras（加購項目）
   if (currentProduct.extras && currentProduct.extras.length > 0) {
+    const currentExtras = selectedOptions.extras || [];
+    const currentExtraNames = currentExtras.map(e => e.name);
+    
     optionsHTML += `
       <div class="options-section">
         <h3 class="options-title">🍳 加購項目（可多選）</h3>
         <div class="options-grid">
-          ${currentProduct.extras.map((extra, index) => `
+          ${currentProduct.extras.map((extra, index) => {
+            const isChecked = currentExtraNames.includes(extra.name);
+            return `
             <div class="option-item">
               <input 
                 type="checkbox" 
@@ -477,13 +573,15 @@ function generateOptions() {
                 class="option-input extra-option"
                 data-name="${extra.name}"
                 data-price="${extra.price}"
+                ${isChecked ? 'checked' : ''}
               >
               <label for="extra-${index}" class="option-label">
                 ${extra.name}
                 <span class="option-price">+$${extra.price}</span>
               </label>
             </div>
-          `).join('')}
+          `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -493,11 +591,14 @@ function generateOptions() {
   if (currentProduct.options) {
     // 甜度選項
     if (currentProduct.options.sweetness) {
+      const currentSweetness = selectedOptions.sweetness || currentProduct.options.sweetness[0];
       optionsHTML += `
         <div class="options-section">
           <h3 class="options-title">🍯 甜度</h3>
           <div class="options-grid">
-            ${currentProduct.options.sweetness.map((sweet, index) => `
+            ${currentProduct.options.sweetness.map((sweet, index) => {
+              const isChecked = sweet === currentSweetness;
+              return `
               <div class="option-item">
                 <input 
                   type="radio" 
@@ -505,13 +606,14 @@ function generateOptions() {
                   id="sweet-${index}" 
                   class="option-input sweetness-option"
                   data-value="${sweet}"
-                  ${index === 0 ? 'checked' : ''}
+                  ${isChecked ? 'checked' : ''}
                 >
                 <label for="sweet-${index}" class="option-label">
                   ${sweet}
                 </label>
               </div>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         </div>
       `;
@@ -519,11 +621,14 @@ function generateOptions() {
     
     // 冰塊選項
     if (currentProduct.options.ice) {
+      const currentIce = selectedOptions.ice || currentProduct.options.ice[0];
       optionsHTML += `
         <div class="options-section">
           <h3 class="options-title">🧊 冰塊</h3>
           <div class="options-grid">
-            ${currentProduct.options.ice.map((iceOption, index) => `
+            ${currentProduct.options.ice.map((iceOption, index) => {
+              const isChecked = iceOption === currentIce;
+              return `
               <div class="option-item">
                 <input 
                   type="radio" 
@@ -531,13 +636,14 @@ function generateOptions() {
                   id="ice-${index}" 
                   class="option-input ice-option"
                   data-value="${iceOption}"
-                  ${index === 0 ? 'checked' : ''}
+                  ${isChecked ? 'checked' : ''}
                 >
                 <label for="ice-${index}" class="option-label">
                   ${iceOption}
                 </label>
               </div>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         </div>
       `;
@@ -546,34 +652,78 @@ function generateOptions() {
   
   optionsContainer.innerHTML = optionsHTML;
   
-  // 初始化預設選項（飲料）
+  // 初始化選項（如果還沒有設定）
   if (currentProduct.options) {
-    if (currentProduct.options.sweetness) {
+    if (currentProduct.options.sweetness && !selectedOptions.sweetness) {
       selectedOptions.sweetness = currentProduct.options.sweetness[0];
     }
-    if (currentProduct.options.ice) {
+    if (currentProduct.options.ice && !selectedOptions.ice) {
       selectedOptions.ice = currentProduct.options.ice[0];
     }
+  }
+  
+  // 編輯模式：確保加購項目的 checkbox 被正確勾選並同步 selectedOptions
+  if (editingCartIndex !== null) {
+    // 等待 DOM 更新後再設置 checkbox
+    setTimeout(() => {
+      const extraCheckboxes = document.querySelectorAll('.extra-option');
+      const currentExtras = selectedOptions.extras || [];
+      const currentExtraNames = currentExtras.map(e => e.name);
+      
+      // 確保 selectedOptions.extras 陣列存在
+      if (!selectedOptions.extras) {
+        selectedOptions.extras = [];
+      }
+      
+      // 同步 checkbox 狀態與 selectedOptions
+      extraCheckboxes.forEach(checkbox => {
+        const extraName = checkbox.dataset.name;
+        const extraPrice = parseInt(checkbox.dataset.price) || 0;
+        
+        // 如果原本已選擇，勾選 checkbox
+        if (currentExtraNames.includes(extraName)) {
+          checkbox.checked = true;
+          // 確保 selectedOptions.extras 中有這個項目
+          if (!selectedOptions.extras.find(e => e.name === extraName)) {
+            selectedOptions.extras.push({ name: extraName, price: extraPrice });
+          }
+        } else {
+          checkbox.checked = false;
+          // 移除不在選擇列表中的項目
+          selectedOptions.extras = selectedOptions.extras.filter(e => e.name !== extraName);
+        }
+      });
+    }, 50);
   }
 }
 
 // ===== 數量控制 =====
-document.getElementById('decreaseBtn').addEventListener('click', () => {
-  if (quantity > 1) {
-    quantity--;
-    document.getElementById('quantityValue').textContent = quantity;
-  }
-});
+const decreaseBtn = document.getElementById('decreaseBtn');
+const increaseBtn = document.getElementById('increaseBtn');
+const quantityValue = document.getElementById('quantityValue');
 
-document.getElementById('increaseBtn').addEventListener('click', () => {
-  if (quantity < 99) {
-    quantity++;
-    document.getElementById('quantityValue').textContent = quantity;
-  }
-});
+if (decreaseBtn && quantityValue) {
+  decreaseBtn.addEventListener('click', () => {
+    if (quantity > 1) {
+      quantity--;
+      quantityValue.textContent = quantity;
+    }
+  });
+}
+
+if (increaseBtn && quantityValue) {
+  increaseBtn.addEventListener('click', () => {
+    if (quantity < 99) {
+      quantity++;
+      quantityValue.textContent = quantity;
+    }
+  });
+}
 
 // ===== 選項變更監聽（事件委派） =====
-document.getElementById('modalOptions').addEventListener('change', (e) => {
+const modalOptions = document.getElementById('modalOptions');
+if (modalOptions) {
+  modalOptions.addEventListener('change', (e) => {
   // 加購項目
   if (e.target.classList.contains('extra-option')) {
     const extraName = e.target.dataset.name;
@@ -593,21 +743,24 @@ document.getElementById('modalOptions').addEventListener('change', (e) => {
     selectedOptions.sweetness = e.target.dataset.value;
   }
   
-  // 冰塊選項
-  if (e.target.classList.contains('ice-option')) {
-    selectedOptions.ice = e.target.dataset.value;
-  }
-});
+    // 冰塊選項
+    if (e.target.classList.contains('ice-option')) {
+      selectedOptions.ice = e.target.dataset.value;
+    }
+  });
+}
 
 // ===== 加入購物車 =====
-document.getElementById('addToCartBtn').addEventListener('click', () => {
-  if (!currentProduct) return;
+const addToCartBtn = document.getElementById('addToCartBtn');
+if (addToCartBtn) {
+  addToCartBtn.addEventListener('click', () => {
+    if (!currentProduct) return;
+    
+    // 移除門市檢查 - 允許使用者先加入購物車，門市選擇延後到結帳頁面
   
-  // 檢查是否選擇門市
-  if (!orderOptions.storeId) {
-    alert('請先選擇門市！');
-    return;
-  }
+  // 取得備註
+  const itemNoteEl = document.getElementById('itemNote');
+  const note = itemNoteEl ? itemNoteEl.value.trim() : '';
   
   // 準備購物車項目
   const cartItem = {
@@ -617,7 +770,8 @@ document.getElementById('addToCartBtn').addEventListener('click', () => {
     image: currentProduct.image,
     category: currentProduct.category,
     quantity: quantity,
-    options: JSON.parse(JSON.stringify(selectedOptions)) // 深拷貝
+    options: JSON.parse(JSON.stringify(selectedOptions)), // 深拷貝
+    note: note || undefined // 備註（如果有）
   };
   
   // 計算總價（含加購項目）
@@ -632,18 +786,26 @@ document.getElementById('addToCartBtn').addEventListener('click', () => {
   // 取得現有購物車
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
   
-  // 檢查是否已存在相同商品（含選項）
-  const existingIndex = cart.findIndex(item => 
-    item.id === cartItem.id &&
-    JSON.stringify(item.options) === JSON.stringify(cartItem.options)
-  );
-  
-  if (existingIndex > -1) {
-    // 如果已存在，增加數量
-    cart[existingIndex].quantity += quantity;
+  // 如果是編輯模式
+  if (editingCartIndex !== null && editingCartIndex >= 0 && editingCartIndex < cart.length) {
+    // 更新現有項目
+    cart[editingCartIndex] = cartItem;
+    editingCartIndex = null; // 重置編輯索引
   } else {
-    // 否則新增項目
-    cart.push(cartItem);
+    // 新增模式：檢查是否已存在相同商品（含選項和備註）
+    const existingIndex = cart.findIndex(item => 
+      item.id === cartItem.id &&
+      JSON.stringify(item.options) === JSON.stringify(cartItem.options) &&
+      (item.note || '') === (cartItem.note || '')
+    );
+    
+    if (existingIndex > -1) {
+      // 如果已存在，增加數量
+      cart[existingIndex].quantity += quantity;
+    } else {
+      // 否則新增項目
+      cart.push(cartItem);
+    }
   }
   
   // 儲存購物車
@@ -662,31 +824,46 @@ document.getElementById('addToCartBtn').addEventListener('click', () => {
   setTimeout(() => {
     closeProductModal();
   }, 800);
-});
+  });
+}
 
 // ===== 顯示成功訊息 =====
-function showSuccessMessage() {
+const showSuccessMessage = () => {
   const btn = document.getElementById('addToCartBtn');
-  const originalText = btn.innerHTML;
+  if (!btn) return;
   
-  btn.innerHTML = '✓ 已加入購物車';
+  const originalText = btn.innerHTML;
+  const isEditMode = editingCartIndex !== null;
+  
+  btn.innerHTML = isEditMode ? '✓ 已更新' : '✓ 已加入購物車';
   btn.style.background = 'var(--accent-green)';
+  
+  // 使用 Toast 通知系統（如果可用）
+  if (typeof window.showSuccess === 'function') {
+    window.showSuccess(isEditMode ? '商品已更新！' : '商品已加入購物車！');
+  }
   
   setTimeout(() => {
     btn.innerHTML = originalText;
     btn.style.background = '';
   }, 2000);
-}
+};
 
 // ===== 關閉彈窗事件 =====
-document.getElementById('modalClose').addEventListener('click', closeProductModal);
+const modalClose = document.getElementById('modalClose');
+if (modalClose) {
+  modalClose.addEventListener('click', closeProductModal);
+}
 
 // 點擊彈窗外部關閉
-document.getElementById('productModal').addEventListener('click', (e) => {
-  if (e.target.id === 'productModal') {
-    closeProductModal();
-  }
-});
+const productModal = document.getElementById('productModal');
+if (productModal) {
+  productModal.addEventListener('click', (e) => {
+    if (e.target.id === 'productModal') {
+      closeProductModal();
+    }
+  });
+}
 
 // ESC 鍵關閉彈窗
 document.addEventListener('keydown', (e) => {
