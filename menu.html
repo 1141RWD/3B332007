@@ -84,6 +84,23 @@
       .menu-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: var(--spacing-md);
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      
+      .page-header {
+        padding: var(--spacing-md);
+      }
+      
+      .category-filter {
+        flex-wrap: wrap;
+        padding: var(--spacing-sm);
+      }
+      
+      .filter-btn {
+        min-height: 44px;
+        font-size: 0.9rem;
       }
     }
     
@@ -91,6 +108,13 @@
       .menu-grid {
         grid-template-columns: 1fr;
         gap: var(--spacing-sm);
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .menu-card {
+        width: 100%;
+        max-width: 100%;
       }
     }
     
@@ -266,6 +290,24 @@
       max-height: 90vh;
       overflow-y: auto;
       animation: slideUp 0.3s ease;
+      margin: var(--spacing-md);
+    }
+    
+    @media (max-width: 768px) {
+      .modal {
+        padding: var(--spacing-sm);
+      }
+      
+      .modal-content {
+        max-width: 100%;
+        width: calc(100% - 2rem);
+        margin: var(--spacing-sm);
+        max-height: 95vh;
+      }
+      
+      .modal-image {
+        height: 200px;
+      }
     }
     
     @keyframes slideUp {

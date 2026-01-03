@@ -16,6 +16,89 @@
   <script src="js/auth.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/cart.js"></script>
+  
+  <style>
+    /* 付款方式選擇區塊樣式 */
+    .payment-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .payment-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.8rem;
+      font-size: 1.05rem;
+    }
+    
+    .payment-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem;
+      border: 2px solid var(--medium-gray);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    
+    .payment-option:hover {
+      border-color: var(--primary-orange);
+      background: var(--soft-peach);
+    }
+    
+    .payment-option input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--primary-orange);
+    }
+    
+    .payment-option input[type="radio"]:checked + .payment-icon {
+      transform: scale(1.2);
+    }
+    
+    .payment-option:has(input:checked) {
+      border-color: var(--primary-orange);
+      background: linear-gradient(135deg, var(--soft-peach), var(--white));
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .payment-icon {
+      font-size: 1.5rem;
+      transition: transform 0.2s ease;
+    }
+    
+    .payment-text {
+      flex: 1;
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .payment-option {
+        padding: 0.8rem;
+        min-height: 44px;
+      }
+      
+      .payment-icon {
+        font-size: 1.3rem;
+      }
+      
+      .payment-text {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </head>
 <body class="cart-page">
   <!-- 導覽列（與 index.html 完全一致）-->
@@ -260,87 +343,5 @@
       };
     });
   </script>
-  
-  <style>
-    /* 付款方式選擇區塊樣式 */
-    .payment-section {
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 2px solid #f0f0f0;
-    }
-    
-    .payment-label {
-      display: block;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 0.8rem;
-      font-size: 1.05rem;
-    }
-    
-    .payment-methods {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    
-    .payment-option {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 1rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .payment-option:hover {
-      border-color: #FF6B35;
-      background: #FFF9F0;
-    }
-    
-    .payment-option input[type="radio"] {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-      accent-color: #FF6B35;
-    }
-    
-    .payment-option input[type="radio"]:checked + .payment-icon {
-      transform: scale(1.2);
-    }
-    
-    .payment-option:has(input:checked) {
-      border-color: #FF6B35;
-      background: linear-gradient(135deg, #FFF3E0, #FFFFFF);
-      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.15);
-    }
-    
-    .payment-icon {
-      font-size: 1.5rem;
-      transition: transform 0.2s ease;
-    }
-    
-    .payment-text {
-      flex: 1;
-      font-weight: 600;
-      color: #333;
-      font-size: 1rem;
-    }
-    
-    @media (max-width: 768px) {
-      .payment-option {
-        padding: 0.8rem;
-      }
-      
-      .payment-icon {
-        font-size: 1.3rem;
-      }
-      
-      .payment-text {
-        font-size: 0.95rem;
-      }
-    }
-  </style>
 </body>
 </html>

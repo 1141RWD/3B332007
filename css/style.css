@@ -433,6 +433,9 @@ main {
     box-shadow: var(--shadow-lg);
     transition: var(--transition-normal);
     gap: var(--spacing-md);
+    z-index: 999;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
   }
   
   .navbar-menu.active {
@@ -1203,6 +1206,22 @@ main {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
   z-index: 10001;
+  margin: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .admin-modal-content {
+    width: calc(100% - 2rem);
+    max-width: 100%;
+    margin: var(--spacing-sm);
+    max-height: 95vh;
+  }
+  
+  .admin-modal-header,
+  .admin-modal-body,
+  .admin-modal-footer {
+    padding: var(--spacing-md);
+  }
 }
 
 .admin-modal-header {
