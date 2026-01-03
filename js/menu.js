@@ -28,6 +28,11 @@ let filteredProducts = [];
 function initStoreSelect() {
   const select = document.getElementById('storeSelect');
   
+  // 如果元素不存在，提前返回（門市選擇可能已移至其他頁面）
+  if (!select) {
+    return;
+  }
+  
   // 填充門市選項
   stores.forEach(store => {
     const option = document.createElement('option');
