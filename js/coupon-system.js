@@ -72,7 +72,7 @@ function addCoupon(couponData) {
     minAmount: parseInt(couponData.minAmount) || 0,
     maxDiscount: couponData.maxDiscount ? parseInt(couponData.maxDiscount) : null,
     pointCost: parseInt(couponData.pointCost) || 0, // 兌換所需點數（0 代表免費/公開）
-    usageLimit: couponData.usageLimit ? parseInt(couponData.usageLimit) : null, // 每人限用次數（null 代表無限制）
+    usageLimit: couponData.usageLimit ? parseInt(couponData.usageLimit) : 0, // 每人限用次數（0 代表無限制）
     createdAt: new Date().toISOString()
   };
   

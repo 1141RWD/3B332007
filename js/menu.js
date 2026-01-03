@@ -452,18 +452,41 @@ window.openProductModal = function(productId, cartIndex = null) {
   
   editingCartIndex = cartIndex;
   
-  // 如果是編輯模式，載入購物車項目的資料
+  // 步驟 1: 初始化資料（深拷貝，避免汙染原始資料）
   if (cartIndex !== null) {
+    // 編輯模式：從購物車讀取資料
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cartItem = cart[cartIndex];
     
     if (cartItem) {
       quantity = cartItem.quantity || 1;
-      selectedOptions = cartItem.options ? JSON.parse(JSON.stringify(cartItem.options)) : {
-        extras: [],
-        sweetness: null,
-        ice: null
-      };
+      
+      // 深拷貝 options，確保 extras 陣列也被正確複製
+      if (cartItem.options) {
+        selectedOptions = JSON.parse(JSON.stringify(cartItem.options));
+        // 確保 extras 是物件陣列格式
+        if (selectedOptions.extras && Array.isArray(selectedOptions.extras)) {
+          selectedOptions.extras = selectedOptions.extras.map(extra => {
+            if (typeof extra === 'string') {
+              // 如果是字串，轉換為物件格式（需要從商品資料中找價格）
+              const productExtra = currentProduct.extras?.find(e => e.name === extra);
+              return {
+                name: extra,
+                price: productExtra?.price || 0
+              };
+            }
+            return extra;
+          });
+        } else {
+          selectedOptions.extras = [];
+        }
+      } else {
+        selectedOptions = {
+          extras: [],
+          sweetness: null,
+          ice: null
+        };
+      }
     } else {
       // 如果找不到項目，重置
       quantity = 1;
@@ -483,7 +506,7 @@ window.openProductModal = function(productId, cartIndex = null) {
     };
   }
   
-  // 填充彈窗內容（添加 DOM 檢查）
+  // 填充彈窗基本內容
   const modalImage = document.getElementById('modalImage');
   const modalTitle = document.getElementById('modalTitle');
   const modalDescription = document.getElementById('modalDescription');
@@ -504,26 +527,95 @@ window.openProductModal = function(productId, cartIndex = null) {
   if (modalPrice) modalPrice.textContent = `$${currentProduct.price}`;
   if (quantityValueEl) quantityValueEl.textContent = quantity;
   
-  // 更新按鈕文字
+  // 更新按鈕文字和行為
   if (addToCartBtn) {
-    addToCartBtn.textContent = cartIndex !== null ? '✅ 確認修改' : '🛒 加入購物車';
+    if (cartIndex !== null) {
+      addToCartBtn.textContent = '✅ 確認修改';
+      // 編輯模式：移除所有舊的事件監聽器，綁定更新函式
+      const newBtn = addToCartBtn.cloneNode(true);
+      addToCartBtn.parentNode.replaceChild(newBtn, addToCartBtn);
+      const updatedBtn = document.getElementById('addToCartBtn');
+      updatedBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.updateCartItem(cartIndex);
+      });
+    } else {
+      addToCartBtn.textContent = '🛒 加入購物車';
+      // 新增模式：使用原有的 addToCart 邏輯（已在下方定義）
+    }
   }
   
-  // 載入備註（如果有）
-  if (itemNoteEl && cartIndex !== null) {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const cartItem = cart[cartIndex];
-    if (cartItem && cartItem.note) {
-      itemNoteEl.value = cartItem.note;
+  // 載入備註（步驟 5）
+  if (itemNoteEl) {
+    if (cartIndex !== null) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const cartItem = cart[cartIndex];
+      itemNoteEl.value = (cartItem && cartItem.note) ? cartItem.note : '';
     } else {
       itemNoteEl.value = '';
     }
-  } else if (itemNoteEl) {
-    itemNoteEl.value = '';
   }
   
-  // 生成選項（會自動回填已選選項）
+  // 步驟 2: 生成選項 UI（必須先執行，才能後續回填）
   generateOptions();
+  
+  // 步驟 3 & 4: 回填加購項目、甜度、冰塊（在 DOM 更新後執行）
+  if (cartIndex !== null) {
+    // 使用 setTimeout 延遲 50ms，等待 DOM 生成完成
+    setTimeout(() => {
+      // 確保 selectedOptions.extras 存在且為陣列
+      if (!selectedOptions.extras) {
+        selectedOptions.extras = [];
+      }
+      
+      // 回填加購項目（關鍵修復）
+      if (selectedOptions.extras && selectedOptions.extras.length > 0) {
+        selectedOptions.extras.forEach(extra => {
+          // 處理不同格式：物件 {name, price} 或字串
+          const extraName = (typeof extra === 'string') ? extra : (extra.name || extra);
+          
+          if (extraName) {
+            // 使用 querySelector 找到對應的 checkbox（透過 data-name 屬性）
+            const checkbox = document.querySelector(`.extra-option[data-name="${extraName}"]`);
+            
+            if (checkbox) {
+              checkbox.checked = true;
+              // 觸發 change 事件，確保 selectedOptions 同步更新
+              checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+              // 如果找不到，嘗試使用所有 checkbox 並比對
+              const allCheckboxes = document.querySelectorAll('.extra-option');
+              allCheckboxes.forEach(cb => {
+                if (cb.dataset.name === extraName) {
+                  cb.checked = true;
+                  cb.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+              });
+            }
+          }
+        });
+      }
+      
+      // 回填甜度（步驟 4）
+      if (selectedOptions.sweetness) {
+        const sweetnessRadio = document.querySelector(`.sweetness-option[data-value="${selectedOptions.sweetness}"]`);
+        if (sweetnessRadio) {
+          sweetnessRadio.checked = true;
+          sweetnessRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      
+      // 回填冰塊（步驟 4）
+      if (selectedOptions.ice) {
+        const iceRadio = document.querySelector(`.ice-option[data-value="${selectedOptions.ice}"]`);
+        if (iceRadio) {
+          iceRadio.checked = true;
+          iceRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    }, 50); // 延遲 50ms，等待 DOM 生成（如用戶要求）
+  }
   
   // 顯示彈窗
   if (productModalEl) {
@@ -662,39 +754,7 @@ function generateOptions() {
     }
   }
   
-  // 編輯模式：確保加購項目的 checkbox 被正確勾選並同步 selectedOptions
-  if (editingCartIndex !== null) {
-    // 等待 DOM 更新後再設置 checkbox
-    setTimeout(() => {
-      const extraCheckboxes = document.querySelectorAll('.extra-option');
-      const currentExtras = selectedOptions.extras || [];
-      const currentExtraNames = currentExtras.map(e => e.name);
-      
-      // 確保 selectedOptions.extras 陣列存在
-      if (!selectedOptions.extras) {
-        selectedOptions.extras = [];
-      }
-      
-      // 同步 checkbox 狀態與 selectedOptions
-      extraCheckboxes.forEach(checkbox => {
-        const extraName = checkbox.dataset.name;
-        const extraPrice = parseInt(checkbox.dataset.price) || 0;
-        
-        // 如果原本已選擇，勾選 checkbox
-        if (currentExtraNames.includes(extraName)) {
-          checkbox.checked = true;
-          // 確保 selectedOptions.extras 中有這個項目
-          if (!selectedOptions.extras.find(e => e.name === extraName)) {
-            selectedOptions.extras.push({ name: extraName, price: extraPrice });
-          }
-        } else {
-          checkbox.checked = false;
-          // 移除不在選擇列表中的項目
-          selectedOptions.extras = selectedOptions.extras.filter(e => e.name !== extraName);
-        }
-      });
-    }, 50);
-  }
+  // 編輯模式的回填邏輯已移至 openProductModal 中，這裡不再重複處理
 }
 
 // ===== 數量控制 =====
@@ -724,19 +784,33 @@ if (increaseBtn && quantityValue) {
 const modalOptions = document.getElementById('modalOptions');
 if (modalOptions) {
   modalOptions.addEventListener('change', (e) => {
-  // 加購項目
-  if (e.target.classList.contains('extra-option')) {
-    const extraName = e.target.dataset.name;
-    const extraPrice = parseInt(e.target.dataset.price);
-    
-    if (e.target.checked) {
-      selectedOptions.extras.push({ name: extraName, price: extraPrice });
-    } else {
-      selectedOptions.extras = selectedOptions.extras.filter(
-        extra => extra.name !== extraName
-      );
+    // 加購項目
+    if (e.target.classList.contains('extra-option')) {
+      const extraName = e.target.dataset.name;
+      const extraPrice = parseInt(e.target.dataset.price) || 0;
+      
+      // 確保 selectedOptions.extras 陣列存在
+      if (!selectedOptions.extras) {
+        selectedOptions.extras = [];
+      }
+      
+      if (e.target.checked) {
+        // 檢查是否已存在，避免重複
+        const exists = selectedOptions.extras.some(e => {
+          if (typeof e === 'string') return e === extraName;
+          return (e.name || e) === extraName;
+        });
+        if (!exists) {
+          selectedOptions.extras.push({ name: extraName, price: extraPrice });
+        }
+      } else {
+        // 移除該項目（支援字串和物件格式）
+        selectedOptions.extras = selectedOptions.extras.filter(extra => {
+          if (typeof extra === 'string') return extra !== extraName;
+          return (extra.name || extra) !== extraName;
+        });
+      }
     }
-  }
   
   // 甜度選項
   if (e.target.classList.contains('sweetness-option')) {
@@ -750,20 +824,64 @@ if (modalOptions) {
   });
 }
 
-// ===== 加入購物車 =====
-const addToCartBtn = document.getElementById('addToCartBtn');
-if (addToCartBtn) {
-  addToCartBtn.addEventListener('click', () => {
-    if (!currentProduct) return;
-    
-    // 移除門市檢查 - 允許使用者先加入購物車，門市選擇延後到結帳頁面
+// ===== 更新購物車項目（編輯模式）=====
+window.updateCartItem = function(index) {
+  if (!currentProduct) return;
+  
+  // 讀取全域變數 quantity 和 selectedOptions
+  // 確保 selectedOptions.extras 是正確的格式
+  if (!selectedOptions.extras) {
+    selectedOptions.extras = [];
+  }
+  
+  // 從 DOM 讀取最新的選項狀態（確保同步）
+  const extraCheckboxes = document.querySelectorAll('.extra-option');
+  const updatedExtras = [];
+  extraCheckboxes.forEach(checkbox => {
+    if (checkbox.checked) {
+      const extraName = checkbox.dataset.name;
+      const extraPrice = parseInt(checkbox.dataset.price) || 0;
+      updatedExtras.push({ name: extraName, price: extraPrice });
+    }
+  });
+  selectedOptions.extras = updatedExtras;
+  
+  // 讀取甜度和冰塊
+  const sweetnessRadio = document.querySelector('.sweetness-option:checked');
+  if (sweetnessRadio) {
+    selectedOptions.sweetness = sweetnessRadio.dataset.value;
+  }
+  
+  const iceRadio = document.querySelector('.ice-option:checked');
+  if (iceRadio) {
+    selectedOptions.ice = iceRadio.dataset.value;
+  }
   
   // 取得備註
   const itemNoteEl = document.getElementById('itemNote');
   const note = itemNoteEl ? itemNoteEl.value.trim() : '';
   
-  // 準備購物車項目
-  const cartItem = {
+  // 讀取購物車
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  
+  if (index < 0 || index >= cart.length) {
+    if (typeof window.showError === 'function') {
+      window.showError('找不到要修改的商品');
+    }
+    return;
+  }
+  
+  // 計算新的單品總價（含加料）
+  let itemTotal = currentProduct.price;
+  if (selectedOptions.extras && selectedOptions.extras.length > 0) {
+    selectedOptions.extras.forEach(extra => {
+      itemTotal += (extra.price || 0);
+    });
+  }
+  
+  // 更新購物車項目
+  cart[index] = {
+    ...cart[index], // 保留原有屬性
     id: currentProduct.id,
     name: currentProduct.name,
     price: currentProduct.price,
@@ -771,27 +889,114 @@ if (addToCartBtn) {
     category: currentProduct.category,
     quantity: quantity,
     options: JSON.parse(JSON.stringify(selectedOptions)), // 深拷貝
-    note: note || undefined // 備註（如果有）
+    note: note || undefined, // 備註
+    totalPrice: itemTotal
   };
   
-  // 計算總價（含加購項目）
-  let itemTotal = currentProduct.price;
-  if (selectedOptions.extras && selectedOptions.extras.length > 0) {
-    selectedOptions.extras.forEach(extra => {
-      itemTotal += extra.price;
-    });
+  // 儲存到 localStorage
+  localStorage.setItem('cart', JSON.stringify(cart));
+  
+  // 更新購物車顯示（如果在購物車頁面）
+  if (typeof window.renderCartItems === 'function') {
+    window.renderCartItems();
   }
-  cartItem.totalPrice = itemTotal;
   
-  // 取得現有購物車
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  // 更新購物車徽章
+  if (typeof window.updateCartCount === 'function') {
+    window.updateCartCount();
+  } else if (typeof updateCartBadge === 'function') {
+    updateCartBadge();
+  }
   
-  // 如果是編輯模式
-  if (editingCartIndex !== null && editingCartIndex >= 0 && editingCartIndex < cart.length) {
-    // 更新現有項目
-    cart[editingCartIndex] = cartItem;
-    editingCartIndex = null; // 重置編輯索引
-  } else {
+  // 重新計算總金額
+  if (typeof window.calculateTotal === 'function') {
+    window.calculateTotal();
+  }
+  
+  // 顯示成功訊息
+  if (typeof window.showSuccess === 'function') {
+    window.showSuccess('商品已更新！');
+  } else if (typeof window.showToast === 'function') {
+    window.showToast('商品已更新！', 'success');
+  }
+  
+  // 關閉 Modal
+  closeProductModal();
+  
+  // 重置編輯模式
+  editingCartIndex = null;
+};
+
+// ===== 加入購物車 =====
+const addToCartBtn = document.getElementById('addToCartBtn');
+if (addToCartBtn) {
+  // 使用事件委派，避免重複綁定
+  addToCartBtn.addEventListener('click', (e) => {
+    // 如果是編輯模式，不執行新增邏輯（由 updateCartItem 處理）
+    if (editingCartIndex !== null) {
+      return;
+    }
+    
+    if (!currentProduct) return;
+    
+    // 移除門市檢查 - 允許使用者先加入購物車，門市選擇延後到結帳頁面
+  
+    // 取得備註
+    const itemNoteEl = document.getElementById('itemNote');
+    const note = itemNoteEl ? itemNoteEl.value.trim() : '';
+    
+    // 確保 selectedOptions.extras 是正確的格式
+    if (!selectedOptions.extras) {
+      selectedOptions.extras = [];
+    }
+    
+    // 從 DOM 讀取最新的選項狀態
+    const extraCheckboxes = document.querySelectorAll('.extra-option');
+    const updatedExtras = [];
+    extraCheckboxes.forEach(checkbox => {
+      if (checkbox.checked) {
+        const extraName = checkbox.dataset.name;
+        const extraPrice = parseInt(checkbox.dataset.price) || 0;
+        updatedExtras.push({ name: extraName, price: extraPrice });
+      }
+    });
+    selectedOptions.extras = updatedExtras;
+    
+    // 讀取甜度和冰塊
+    const sweetnessRadio = document.querySelector('.sweetness-option:checked');
+    if (sweetnessRadio) {
+      selectedOptions.sweetness = sweetnessRadio.dataset.value;
+    }
+    
+    const iceRadio = document.querySelector('.ice-option:checked');
+    if (iceRadio) {
+      selectedOptions.ice = iceRadio.dataset.value;
+    }
+    
+    // 準備購物車項目
+    const cartItem = {
+      id: currentProduct.id,
+      name: currentProduct.name,
+      price: currentProduct.price,
+      image: currentProduct.image,
+      category: currentProduct.category,
+      quantity: quantity,
+      options: JSON.parse(JSON.stringify(selectedOptions)), // 深拷貝
+      note: note || undefined // 備註（如果有）
+    };
+    
+    // 計算總價（含加購項目）
+    let itemTotal = currentProduct.price;
+    if (selectedOptions.extras && selectedOptions.extras.length > 0) {
+      selectedOptions.extras.forEach(extra => {
+        itemTotal += (extra.price || 0);
+      });
+    }
+    cartItem.totalPrice = itemTotal;
+    
+    // 取得現有購物車
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
     // 新增模式：檢查是否已存在相同商品（含選項和備註）
     const existingIndex = cart.findIndex(item => 
       item.id === cartItem.id &&
@@ -806,24 +1011,25 @@ if (addToCartBtn) {
       // 否則新增項目
       cart.push(cartItem);
     }
-  }
-  
-  // 儲存購物車
-  localStorage.setItem('cart', JSON.stringify(cart));
-  
-  // 儲存訂單選項
-  localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
-  
-  // 更新徽章
-  updateCartBadge();
-  
-  // 顯示成功訊息
-  showSuccessMessage();
-  
-  // 關閉彈窗
-  setTimeout(() => {
-    closeProductModal();
-  }, 800);
+    
+    // 儲存購物車
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // 儲存訂單選項
+    if (typeof orderOptions !== 'undefined') {
+      localStorage.setItem('orderOptions', JSON.stringify(orderOptions));
+    }
+    
+    // 更新徽章
+    updateCartBadge();
+    
+    // 顯示成功訊息
+    showSuccessMessage();
+    
+    // 關閉彈窗
+    setTimeout(() => {
+      closeProductModal();
+    }, 800);
   });
 }
 

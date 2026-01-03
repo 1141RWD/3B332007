@@ -385,22 +385,29 @@ window.loadAvailableCoupons = function() {
   const cartSubtotal = CartUtils.getSubtotal(cart);
   
   // 過濾：只顯示用戶擁有的券 + 全站免費券（pointCost === 0）
-  // 排除已過期或未達低消的券
+  // 排除已停用、過期或未達低消的券
   const availableCoupons = allCoupons.filter(c => {
+    // 排除已停用的券
     if (!c.active) return false;
+    
     const pointCost = c.pointCost || 0;
     
     // 必須是用戶擁有的券或全站免費券
     const isOwned = ownedCouponCodes.includes(c.code);
     if (pointCost > 0 && !isOwned) return false;
     
-    // 檢查最低消費（未達低消的券設為 disabled，但不隱藏）
-    const minAmount = c.minAmount || 0;
-    if (cartSubtotal < minAmount) {
-      // 未達低消，但保留在列表中（會設為 disabled）
-      return true;
+    // 檢查使用次數限制（如果有限制）
+    if (c.usageLimit && c.usageLimit > 0 && currentUser && currentUser.email) {
+      const usedCoupons = currentUser.usedCoupons || {};
+      const usedCount = usedCoupons[c.code] || 0;
+      if (usedCount >= c.usageLimit) {
+        return false; // 已達使用上限，不顯示
+      }
     }
     
+    // 檢查最低消費（未達低消的券設為 disabled，但不隱藏）
+    const minAmount = c.minAmount || 0;
+    // 即使未達低消也保留在列表中（會設為 disabled）
     return true;
   });
   
@@ -418,10 +425,26 @@ window.loadAvailableCoupons = function() {
         
         // 檢查是否未達低消
         const isDisabled = cartSubtotal < minAmount;
+        
+        // 檢查使用次數限制
+        let usageLimitText = '';
+        if (coupon.usageLimit && coupon.usageLimit > 0 && currentUser && currentUser.email) {
+          const usedCoupons = currentUser.usedCoupons || {};
+          const usedCount = usedCoupons[coupon.code] || 0;
+          const remaining = coupon.usageLimit - usedCount;
+          if (remaining <= 0) {
+            // 已達上限，不應該出現在這裡（應該已被過濾掉）
+            // 但為了安全起見，設為 disabled
+            return `<option value="${coupon.code}" disabled>${coupon.title} - ${discountText}${minAmountText} [已達使用上限]</option>`;
+          } else if (coupon.usageLimit > 0) {
+            usageLimitText = ` (剩餘 ${remaining}/${coupon.usageLimit} 次)`;
+          }
+        }
+        
         const disabledAttr = isDisabled ? ' disabled' : '';
         const disabledText = isDisabled ? ' [未達低消]' : '';
         
-        return `<option value="${coupon.code}"${disabledAttr}>${coupon.title} - ${discountText}${minAmountText}${disabledText}</option>`;
+        return `<option value="${coupon.code}"${disabledAttr}>${coupon.title} - ${discountText}${minAmountText}${usageLimitText}${disabledText}</option>`;
       }).join('');
   }
 };
@@ -449,6 +472,24 @@ window.calculateTotal = function() {
       if (coupon) {
         // 檢查最低消費金額
         if (subtotal >= (coupon.minAmount || 0)) {
+          // 檢查使用次數限制
+          const currentUser = typeof window.getCurrentUser === 'function' 
+            ? window.getCurrentUser() 
+            : JSON.parse(localStorage.getItem('currentUser') || 'null');
+          
+          if (coupon.usageLimit && currentUser && currentUser.email) {
+            const usedCoupons = currentUser.usedCoupons || {};
+            const usedCount = usedCoupons[couponCode] || 0;
+            if (usedCount >= coupon.usageLimit) {
+              if (typeof window.showError === 'function') {
+                window.showError(`此折價券已達使用上限（${coupon.usageLimit}次）`);
+              }
+              couponSelect.value = '';
+              discount = 0;
+              return;
+            }
+          }
+          
           if (coupon.type === 'percent') {
             // 百分比折扣
             discount = Math.round(subtotal * (1 - coupon.discount));
@@ -497,14 +538,14 @@ window.calculateTotal = function() {
     subtotalElement.textContent = '$' + subtotal;
   }
   
-  // 折扣（負數顯示）
+  // 折扣（負數顯示，若無折扣則不顯示或顯示 $0）
   if (discountElement) {
     if (discount > 0) {
       discountElement.textContent = '-$' + discount;
       discountElement.style.color = 'var(--accent-green)';
     } else {
       discountElement.textContent = '$0';
-      discountElement.style.color = 'inherit';
+      discountElement.style.color = 'var(--dark-gray)';
     }
   }
   
@@ -513,10 +554,9 @@ window.calculateTotal = function() {
     totalElement.textContent = '$' + finalTotal;
   }
   
-  // 顯示/隱藏折扣資訊
+  // 顯示/隱藏折扣資訊區塊
   if (discount > 0 && discountInfo) {
     if (discountInfoDiv) discountInfoDiv.style.display = 'block';
-    if (discountElement) discountElement.textContent = '-$' + discount;
     if (originalPriceElement) originalPriceElement.textContent = '$' + discountInfo.originalPrice;
   } else {
     if (discountInfoDiv) discountInfoDiv.style.display = 'none';

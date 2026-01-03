@@ -476,7 +476,57 @@ window.goToCheckout = function() {
     return;
   }
   
-  // 門市選擇檢查已移至結帳頁面，這裡不再檢查
+  // 保存優惠券資訊到 localStorage（用於結帳頁面）
+  const couponSelect = document.getElementById('couponSelect');
+  let couponCode = '';
+  let discountAmount = 0;
+  
+  if (couponSelect && couponSelect.value) {
+    couponCode = couponSelect.value;
+    
+    // 計算折扣金額
+    let subtotal = 0;
+    cart.forEach(item => {
+      let itemTotal = item.price * (item.quantity || 1);
+      if (item.options && item.options.extras) {
+        item.options.extras.forEach(extra => {
+          itemTotal += (extra.price || 0) * (item.quantity || 1);
+        });
+      }
+      subtotal += itemTotal;
+    });
+    
+    const coupons = JSON.parse(localStorage.getItem('coupons') || '[]');
+    const coupon = coupons.find(c => c.code === couponCode && c.active !== false);
+    
+    if (coupon && subtotal >= (coupon.minAmount || 0)) {
+      if (coupon.type === 'percent') {
+        discountAmount = Math.round(subtotal * (1 - coupon.discount));
+      } else if (coupon.type === 'fixed') {
+        discountAmount = coupon.discount;
+      }
+      if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+        discountAmount = coupon.maxDiscount;
+      }
+    }
+  }
+  
+  // 保存到 localStorage
+  const tempOrder = {
+    couponCode: couponCode || null,
+    discountAmount: discountAmount,
+    subtotal: cart.reduce((sum, item) => {
+      let itemTotal = item.price * (item.quantity || 1);
+      if (item.options && item.options.extras) {
+        item.options.extras.forEach(extra => {
+          itemTotal += (extra.price || 0) * (item.quantity || 1);
+        });
+      }
+      return sum + itemTotal;
+    }, 0)
+  };
+  localStorage.setItem('tempOrder', JSON.stringify(tempOrder));
+  
   // 跳轉到結帳頁面
   window.location.href = 'checkout.html';
 };

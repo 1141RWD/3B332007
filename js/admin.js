@@ -337,8 +337,8 @@ window.confirmUpdateOrderStatus = function(orderId) {
   const oldStatus = order.status;
   
   orders[orderIndex].status = newStatus;
-  orders[orderIndex].updatedAt = new Date().toISOString();
-  localStorage.setItem('orders', JSON.stringify(orders));
+    orders[orderIndex].updatedAt = new Date().toISOString();
+    localStorage.setItem('orders', JSON.stringify(orders));
   
   // 點數回饋邏輯：當訂單狀態變更為「已完成」時
   if (newStatus === 'completed' && oldStatus !== 'completed') {
@@ -362,8 +362,11 @@ window.confirmUpdateOrderStatus = function(orderId) {
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
           }
           
+          // 顯示 Toast 通知
           if (typeof window.showSuccess === 'function') {
             window.showSuccess(`訂單已完成，會員獲得 ${pointsEarned} 點！`);
+          } else if (typeof window.showToast === 'function') {
+            window.showToast(`訂單已完成，會員獲得 ${pointsEarned} 點！`, 'success');
           }
         }
       }
@@ -371,7 +374,7 @@ window.confirmUpdateOrderStatus = function(orderId) {
   }
   
   window.closeAdminModal();
-  loadOrders();
+    loadOrders();
   
   if (typeof window.showSuccess === 'function' && newStatus !== 'completed') {
     window.showSuccess('訂單狀態已更新');
@@ -452,6 +455,12 @@ function loadMembers() {
                 onclick="toggleMemberStatus('${user.email}')">
                 ${user.active !== false ? '停權' : '啟用'}
               </button>
+              ${user.role === 'user' 
+                ? `<button class="action-btn btn-edit" onclick="promoteToAdmin('${user.email}')" style="background: #4CAF50;">設為管理員</button>`
+                : user.role === 'admin' 
+                  ? `<button class="action-btn btn-edit" onclick="demoteToUser('${user.email}')" style="background: #FF9800;">降級</button>`
+                  : ''
+              }
             </td>
           </tr>
         `).join('')}
@@ -621,6 +630,116 @@ window.confirmEditMemberPoints = function(email) {
     window.showSuccess('點數已更新');
   }
 }
+
+// ===== 設為管理員 =====
+window.promoteToAdmin = function(email) {
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.email === email);
+  
+  if (userIndex === -1) {
+    if (typeof window.showError === 'function') {
+      window.showError('找不到會員');
+    }
+    return;
+  }
+  
+  const user = users[userIndex];
+  
+  if (typeof window.showConfirm === 'function') {
+    window.showConfirm(
+      `確定要將「${user.name}」設為管理員嗎？`,
+      () => {
+        users[userIndex].role = 'admin';
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // 更新 currentUser（如果當前登入的是該用戶）
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (currentUser && currentUser.email === email) {
+          currentUser.role = 'admin';
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+        
+        loadMembers();
+        if (typeof window.showSuccess === 'function') {
+          window.showSuccess('已設為管理員');
+        } else if (typeof window.showToast === 'function') {
+          window.showToast('已設為管理員', 'success');
+        }
+      }
+    );
+  } else {
+    if (confirm(`確定要將「${user.name}」設為管理員嗎？`)) {
+      users[userIndex].role = 'admin';
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+      if (currentUser && currentUser.email === email) {
+        currentUser.role = 'admin';
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+      
+      loadMembers();
+      if (typeof window.showSuccess === 'function') {
+        window.showSuccess('已設為管理員');
+      }
+    }
+  }
+};
+
+// ===== 降級為會員 =====
+window.demoteToUser = function(email) {
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.email === email);
+  
+  if (userIndex === -1) {
+    if (typeof window.showError === 'function') {
+      window.showError('找不到會員');
+    }
+    return;
+  }
+  
+  const user = users[userIndex];
+  
+  if (typeof window.showConfirm === 'function') {
+    window.showConfirm(
+      `確定要將「${user.name}」降級為一般會員嗎？`,
+      () => {
+        users[userIndex].role = 'user';
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // 更新 currentUser（如果當前登入的是該用戶）
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (currentUser && currentUser.email === email) {
+          currentUser.role = 'user';
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+        
+        loadMembers();
+        if (typeof window.showSuccess === 'function') {
+          window.showSuccess('已降級為一般會員');
+        } else if (typeof window.showToast === 'function') {
+          window.showToast('已降級為一般會員', 'success');
+        }
+      }
+    );
+  } else {
+    if (confirm(`確定要將「${user.name}」降級為一般會員嗎？`)) {
+      users[userIndex].role = 'user';
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+      if (currentUser && currentUser.email === email) {
+        currentUser.role = 'user';
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+      
+      loadMembers();
+      if (typeof window.showSuccess === 'function') {
+        window.showSuccess('已降級為一般會員');
+      }
+    }
+  }
+};
 
 // ===== 切換會員權限（升級/降級管理員）=====
 window.toggleMemberRole = function(email) {
@@ -1568,6 +1687,11 @@ function renderCouponsPanel() {
           <label style="display: block; font-weight: 600; margin-bottom: var(--spacing-xs);">最大折扣（選填）</label>
           <input type="number" id="couponMaxDiscount" placeholder="不限制" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm);">
         </div>
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: var(--spacing-xs);">每人限用次數</label>
+          <input type="number" id="couponUsageLimit" placeholder="0 (0 為不限)" min="0" style="width: 100%; padding: var(--spacing-sm); border: 2px solid var(--medium-gray); border-radius: var(--radius-sm);">
+          <div style="font-size: 0.85rem; color: var(--dark-gray); margin-top: 0.25rem;">💡 設為 0 代表不限次數，> 0 代表每人限用次數</div>
+        </div>
       </div>
       <div style="margin-top: var(--spacing-md);">
         <label style="display: block; font-weight: 600; margin-bottom: var(--spacing-xs);">說明</label>
@@ -1594,6 +1718,7 @@ function renderCouponsPanel() {
             <th>折扣</th>
             <th>條件</th>
             <th>所需點數</th>
+            <th>限用次數</th>
             <th>狀態</th>
             <th>主打</th>
             <th>操作</th>
@@ -1601,7 +1726,7 @@ function renderCouponsPanel() {
         </thead>
         <tbody>
           ${coupons.length === 0 ? 
-            '<tr><td colspan="8" style="text-align: center; padding: 2rem;">尚無折價券</td></tr>' :
+            '<tr><td colspan="9" style="text-align: center; padding: 2rem;">尚無折價券</td></tr>' :
             coupons.map(coupon => `
               <tr>
                 <td><strong>${coupon.code}</strong></td>
@@ -1609,6 +1734,7 @@ function renderCouponsPanel() {
                 <td>${coupon.type === 'percent' ? `${Math.round((1-coupon.discount)*100)}% OFF` : `折 $${coupon.discount}`}</td>
                 <td>滿 $${coupon.minAmount}</td>
                 <td>${coupon.pointCost || 0} 點</td>
+                <td>${coupon.usageLimit ? `${coupon.usageLimit} 次` : '不限'}</td>
                 <td>
                   <span class="status-badge ${coupon.active ? 'status-completed' : 'status-cancelled'}">
                     ${coupon.active ? '啟用' : '停用'}
@@ -1651,6 +1777,7 @@ function hideAddCouponForm() {
     const minAmountInput = document.getElementById('couponMinAmount');
     const pointCostInput = document.getElementById('couponPointCost');
     const maxDiscountInput = document.getElementById('couponMaxDiscount');
+    const usageLimitInput = document.getElementById('couponUsageLimit');
     const descriptionInput = document.getElementById('couponDescription');
     const featuredInput = document.getElementById('couponFeatured');
     
@@ -1660,6 +1787,7 @@ function hideAddCouponForm() {
     if (minAmountInput) minAmountInput.value = '';
     if (pointCostInput) pointCostInput.value = '';
     if (maxDiscountInput) maxDiscountInput.value = '';
+    if (usageLimitInput) usageLimitInput.value = '';
     if (descriptionInput) descriptionInput.value = '';
     if (featuredInput) featuredInput.checked = false;
   }
@@ -1673,6 +1801,7 @@ function submitCoupon() {
   const minAmount = document.getElementById('couponMinAmount').value || 0;
   const pointCost = document.getElementById('couponPointCost').value || 0;
   const maxDiscount = document.getElementById('couponMaxDiscount').value || null;
+  const usageLimit = document.getElementById('couponUsageLimit').value || 0;
   const description = document.getElementById('couponDescription').value.trim();
   const featured = document.getElementById('couponFeatured').checked;
   
@@ -1684,7 +1813,7 @@ function submitCoupon() {
   }
   
   const result = addCoupon({
-    code, title, type, discount, minAmount, pointCost, maxDiscount, description, featured
+    code, title, type, discount, minAmount, pointCost, maxDiscount, usageLimit, description, featured
   });
   
   if (result.success) {
@@ -1749,6 +1878,11 @@ function editCoupon(code) {
           <input type="number" id="editCouponMaxDiscount" class="admin-modal-form-input" value="${coupon.maxDiscount || ''}" min="0">
         </div>
         <div class="admin-modal-form-group">
+          <label class="admin-modal-form-label">每人限用次數</label>
+          <input type="number" id="editCouponUsageLimit" class="admin-modal-form-input" value="${coupon.usageLimit || 0}" min="0">
+          <div style="font-size: 0.85rem; color: var(--dark-gray); margin-top: 0.25rem;">💡 設為 0 代表不限次數</div>
+        </div>
+        <div class="admin-modal-form-group">
           <label class="admin-modal-form-label">說明</label>
           <textarea id="editCouponDescription" class="admin-modal-form-textarea">${coupon.description || ''}</textarea>
         </div>
@@ -1769,6 +1903,7 @@ window.confirmEditCoupon = function(code) {
   const minAmount = parseInt(document.getElementById('editCouponMinAmount').value) || 0;
   const pointCost = parseInt(document.getElementById('editCouponPointCost').value) || 0;
   const maxDiscount = document.getElementById('editCouponMaxDiscount').value ? parseInt(document.getElementById('editCouponMaxDiscount').value) : null;
+  const usageLimit = parseInt(document.getElementById('editCouponUsageLimit').value) || 0;
   const description = document.getElementById('editCouponDescription').value.trim();
   
   if (!title || isNaN(discount)) {
@@ -1779,7 +1914,7 @@ window.confirmEditCoupon = function(code) {
   }
   
   const result = updateCoupon(code, {
-    title, type, discount, minAmount, pointCost, maxDiscount, description
+    title, type, discount, minAmount, pointCost, maxDiscount, usageLimit, description
   });
   
   if (result.success) {

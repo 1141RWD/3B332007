@@ -577,3 +577,318 @@ if (typeof displayContactMessages === 'function') {
     setTimeout(displayContactMessages, 500);
   });
 }
+
+// ===== 渲染點數兌換專區 =====
+function renderCouponExchange(user) {
+  const exchangeList = document.getElementById('couponExchangeList');
+  if (!exchangeList) return;
+  
+  // 取得可兌換的折價券（pointCost > 0 且 active === true）
+  let exchangeableCoupons = [];
+  if (typeof window.getExchangeableCoupons === 'function') {
+    exchangeableCoupons = window.getExchangeableCoupons();
+  } else {
+    // 備用方案：直接從 localStorage 讀取
+    const allCoupons = JSON.parse(localStorage.getItem('coupons') || '[]');
+    exchangeableCoupons = allCoupons.filter(c => {
+      const pointCost = c.pointCost || 0;
+      return c.active && pointCost > 0;
+    });
+  }
+  
+  // 不過濾已擁有的券，允許重複兌換（囤貨模式）
+  const ownedCoupons = user.ownedCoupons || [];
+  
+  if (exchangeableCoupons.length === 0) {
+    exchangeList.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: var(--dark-gray);">
+        <p>目前沒有可兌換的折價券</p>
+      </div>
+    `;
+    return;
+  }
+  
+  exchangeList.innerHTML = exchangeableCoupons.map(coupon => {
+    const pointCost = coupon.pointCost || 0;
+    const canAfford = (user.points || 0) >= pointCost;
+    const discountText = coupon.type === 'percent' 
+      ? `${(coupon.discount * 100).toFixed(0)}折` 
+      : `折抵 $${coupon.discount}`;
+    const minAmountText = coupon.minAmount > 0 ? `滿 $${coupon.minAmount} 可用` : '無低消限制';
+    
+    // 計算持有數量
+    const ownedCount = ownedCoupons.filter(code => code === coupon.code).length;
+    const ownedCountText = ownedCount > 0 ? ` (目前持有 ${ownedCount} 張)` : '';
+    
+    return `
+      <div style="background: var(--white); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--primary-orange);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+          <div>
+            <h4 style="margin: 0 0 0.5rem 0; color: var(--text-dark);">${coupon.title || coupon.code}${ownedCountText}</h4>
+            <p style="margin: 0; color: var(--dark-gray); font-size: 0.9rem;">${coupon.description || ''}</p>
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--primary-orange);">
+              💰 ${discountText} | ${minAmountText}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary-orange);">
+              ${pointCost} 點
+            </div>
+          </div>
+        </div>
+        <button 
+          class="btn btn-primary" 
+          onclick="window.exchangeCoupon('${coupon.code}')"
+          style="width: 100%; ${!canAfford ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
+          ${!canAfford ? 'disabled' : ''}
+        >
+          ${canAfford ? '🎁 立即兌換' : '❌ 點數不足'}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== 渲染我的折價券 =====
+function renderMyCoupons(user) {
+  const myCouponsList = document.getElementById('myCouponsList');
+  if (!myCouponsList) return;
+  
+  // 取得使用者擁有的折價券
+  const ownedCoupons = user.ownedCoupons || [];
+  
+  // 取得所有全站免費券（pointCost === 0 且 active === true）
+  const allCoupons = JSON.parse(localStorage.getItem('coupons') || '[]');
+  const freeCoupons = allCoupons.filter(c => {
+    const pointCost = c.pointCost || 0;
+    return c.active && pointCost === 0;
+  });
+  
+  // 合併：使用者擁有的券 + 全站免費券（去重）
+  const allMyCoupons = [];
+  const couponCodes = new Set();
+  
+  // 取得使用者的已使用次數記錄
+  const usedCoupons = user.usedCoupons || {};
+  
+  // 先加入使用者擁有的券
+  ownedCoupons.forEach(code => {
+    const coupon = allCoupons.find(c => c.code === code);
+    if (coupon && coupon.active) {
+      // 檢查是否已用完
+      const usedCount = usedCoupons[coupon.code] || 0;
+      const limit = coupon.usageLimit || 0;
+      
+      // 若有限用次數且已達上限，則過濾掉
+      if (limit > 0 && usedCount >= limit) {
+        return; // 跳過此券
+      }
+      
+      allMyCoupons.push(coupon);
+      couponCodes.add(code);
+    }
+  });
+  
+  // 再加入全站免費券（如果還沒加入）
+  freeCoupons.forEach(coupon => {
+    if (!couponCodes.has(coupon.code)) {
+      // 檢查是否已用完
+      const usedCount = usedCoupons[coupon.code] || 0;
+      const limit = coupon.usageLimit || 0;
+      
+      // 若有限用次數且已達上限，則過濾掉
+      if (limit > 0 && usedCount >= limit) {
+        return; // 跳過此券
+      }
+      
+      allMyCoupons.push(coupon);
+      couponCodes.add(coupon.code);
+    }
+  });
+  
+  if (allMyCoupons.length === 0) {
+    myCouponsList.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: var(--dark-gray);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🎟️</div>
+        <p>您還沒有折價券</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">快去點數兌換專區兌換吧！</p>
+      </div>
+    `;
+    return;
+  }
+  
+  myCouponsList.innerHTML = allMyCoupons.map(coupon => {
+    const discountText = coupon.type === 'percent' 
+      ? `${(coupon.discount * 100).toFixed(0)}折` 
+      : `折抵 $${coupon.discount}`;
+    const minAmountText = coupon.minAmount > 0 ? `滿 $${coupon.minAmount} 可用` : '無低消限制';
+    const isFree = (coupon.pointCost || 0) === 0;
+    
+    // 取得使用次數資訊
+    const usedCount = usedCoupons[coupon.code] || 0;
+    const limit = coupon.usageLimit || 0;
+    let usageLimitText = '';
+    if (limit > 0) {
+      usageLimitText = `已用 ${usedCount} / 限 ${limit} 次`;
+    } else {
+      usageLimitText = '不限次數';
+    }
+    
+    // 最高折抵資訊
+    const maxDiscountText = coupon.maxDiscount 
+      ? `(最高折抵 $${coupon.maxDiscount})` 
+      : '';
+    
+    return `
+      <div style="background: var(--white); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm); border-left: 4px solid ${isFree ? '#4CAF50' : 'var(--primary-orange)'};">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <h4 style="margin: 0; color: var(--text-dark);">${coupon.title || coupon.code}</h4>
+              ${isFree ? '<span style="background: #4CAF50; color: white; padding: 0.2rem 0.5rem; border-radius: var(--radius-full); font-size: 0.75rem;">免費券</span>' : ''}
+            </div>
+            <p style="margin: 0 0 0.5rem 0; color: var(--dark-gray); font-size: 0.9rem;">${coupon.description || ''}</p>
+            <div style="font-size: 0.85rem; color: var(--primary-orange); margin-bottom: 0.25rem;">
+              💰 ${discountText} ${maxDiscountText}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--dark-gray); margin-bottom: 0.25rem;">
+              📋 ${minAmountText}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--dark-gray);">
+              🔢 ${usageLimitText}
+            </div>
+          </div>
+          <div style="text-align: right; margin-left: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-orange);">
+              ${coupon.code}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== 兌換折價券 =====
+window.exchangeCoupon = function(couponCode) {
+  const user = checkLoginStatus();
+  if (!user) return;
+  
+  // 取得折價券資訊
+  const allCoupons = JSON.parse(localStorage.getItem('coupons') || '[]');
+  const coupon = allCoupons.find(c => c.code === couponCode);
+  
+  if (!coupon) {
+    if (typeof window.showError === 'function') {
+      window.showError('找不到折價券');
+    }
+    return;
+  }
+  
+  const pointCost = coupon.pointCost || 0;
+  const userPoints = user.points || 0;
+  
+  // 檢查點數是否足夠
+  if (userPoints < pointCost) {
+    if (typeof window.showError === 'function') {
+      window.showError(`點數不足，需要 ${pointCost} 點`);
+    } else if (typeof window.showToast === 'function') {
+      window.showToast(`點數不足，需要 ${pointCost} 點`, 'error');
+    }
+    return;
+  }
+  
+  // 取得當前持有數量（用於顯示）
+  const ownedCoupons = user.ownedCoupons || [];
+  const currentCount = ownedCoupons.filter(code => code === couponCode).length;
+  
+  // 確認兌換（允許重複兌換）
+  if (typeof window.showConfirm === 'function') {
+    window.showConfirm(
+      `確定要用 ${pointCost} 點兌換「${coupon.title || couponCode}」嗎？${currentCount > 0 ? `\n目前持有 ${currentCount} 張，兌換後將有 ${currentCount + 1} 張` : ''}`,
+      () => {
+        // 扣除點數
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userIndex = users.findIndex(u => u.email === user.email);
+        
+        if (userIndex > -1) {
+          users[userIndex].points = (users[userIndex].points || 0) - pointCost;
+          
+          // 加入折價券（允許重複，直接 push）
+          if (!users[userIndex].ownedCoupons) {
+            users[userIndex].ownedCoupons = [];
+          }
+          users[userIndex].ownedCoupons.push(couponCode);
+          
+          localStorage.setItem('users', JSON.stringify(users));
+          
+          // 更新 currentUser
+          user.points = users[userIndex].points;
+          user.ownedCoupons = users[userIndex].ownedCoupons;
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          
+          // 計算新的持有數量
+          const newCount = user.ownedCoupons.filter(code => code === couponCode).length;
+          
+          // 只重新渲染兌換列表（更新持有數量顯示）和我的折價券
+          renderCouponExchange(user);
+          renderMyCoupons(user);
+          
+          // 更新點數顯示
+          const statValue = document.querySelector('.stat-value');
+          if (statValue) {
+            statValue.textContent = user.points || 0;
+          }
+          
+          if (typeof window.showSuccess === 'function') {
+            window.showSuccess(`兌換成功！目前持有 ${newCount} 張「${coupon.title || couponCode}」`);
+          } else if (typeof window.showToast === 'function') {
+            window.showToast(`兌換成功！目前持有 ${newCount} 張「${coupon.title || couponCode}」`, 'success');
+          }
+        }
+      }
+    );
+  } else {
+    if (confirm(`確定要用 ${pointCost} 點兌換「${coupon.title || couponCode}」嗎？${currentCount > 0 ? `\n目前持有 ${currentCount} 張，兌換後將有 ${currentCount + 1} 張` : ''}`)) {
+      // 扣除點數
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = users.findIndex(u => u.email === user.email);
+      
+      if (userIndex > -1) {
+        users[userIndex].points = (users[userIndex].points || 0) - pointCost;
+        
+        // 加入折價券（允許重複，直接 push）
+        if (!users[userIndex].ownedCoupons) {
+          users[userIndex].ownedCoupons = [];
+        }
+        users[userIndex].ownedCoupons.push(couponCode);
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // 更新 currentUser
+        user.points = users[userIndex].points;
+        user.ownedCoupons = users[userIndex].ownedCoupons;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
+        // 計算新的持有數量
+        const newCount = user.ownedCoupons.filter(code => code === couponCode).length;
+        
+        // 只重新渲染兌換列表（更新持有數量顯示）和我的折價券
+        renderCouponExchange(user);
+        renderMyCoupons(user);
+        
+        // 更新點數顯示
+        const statValue = document.querySelector('.stat-value');
+        if (statValue) {
+          statValue.textContent = user.points || 0;
+        }
+        
+        if (typeof window.showSuccess === 'function') {
+          window.showSuccess(`兌換成功！目前持有 ${newCount} 張「${coupon.title || couponCode}」`);
+        } else if (typeof window.showToast === 'function') {
+          window.showToast(`兌換成功！目前持有 ${newCount} 張「${coupon.title || couponCode}」`, 'success');
+        }
+      }
+    }
+  }
+};

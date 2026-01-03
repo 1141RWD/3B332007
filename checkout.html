@@ -850,7 +850,12 @@
       const container = document.getElementById('orderItems');
       const totalElement = document.getElementById('totalAmount');
       
-      let total = 0;
+      // 讀取優惠券資訊（從購物車頁面傳遞）
+      const tempOrder = JSON.parse(localStorage.getItem('tempOrder') || '{}');
+      const couponCode = tempOrder.couponCode || '';
+      const discountAmount = tempOrder.discountAmount || 0;
+      
+      let subtotal = 0;
       
       container.innerHTML = cart.map(item => {
         let itemTotal = item.price * item.quantity;
@@ -861,7 +866,7 @@
           });
         }
         
-        total += itemTotal;
+        subtotal += itemTotal;
         
         return `
           <div class="summary-item">
@@ -878,6 +883,23 @@
           </div>
         `;
       }).join('');
+      
+      // 顯示小計、折扣和總計
+      const total = Math.max(0, subtotal - discountAmount);
+      
+      // 如果有折扣，顯示折扣行
+      if (discountAmount > 0) {
+        container.innerHTML += `
+          <div class="summary-item" style="border-top: 1px solid #eee; padding-top: 0.75rem; margin-top: 0.75rem;">
+            <div class="item-name" style="font-weight: 600;">小計</div>
+            <div class="item-price">$${subtotal}</div>
+          </div>
+          <div class="summary-item" style="color: var(--accent-green);">
+            <div class="item-name" style="font-weight: 600;">折扣優惠${couponCode ? ` (${couponCode})` : ''}</div>
+            <div class="item-price">-$${discountAmount}</div>
+          </div>
+        `;
+      }
       
       totalElement.textContent = `$${total}`;
     }
@@ -972,23 +994,30 @@
         subtotal += itemTotal;
       });
       
-      // 取得優惠券資訊（從購物車頁面傳遞或從 localStorage 讀取）
-      let couponCode = '';
-      let discount = 0;
-      const couponSelect = document.getElementById('couponSelect');
-      if (couponSelect && couponSelect.value) {
-        couponCode = couponSelect.value;
-        // 計算折扣金額
-        const coupons = JSON.parse(localStorage.getItem('coupons') || '[]');
-        const coupon = coupons.find(c => c.code === couponCode && c.active !== false);
-        if (coupon && subtotal >= (coupon.minAmount || 0)) {
-          if (coupon.type === 'percent') {
-            discount = Math.round(subtotal * (1 - coupon.discount));
-          } else if (coupon.type === 'fixed') {
-            discount = coupon.discount;
-          }
-          if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-            discount = coupon.maxDiscount;
+      // 取得優惠券資訊（從購物車頁面傳遞的 tempOrder）
+      const tempOrder = JSON.parse(localStorage.getItem('tempOrder') || '{}');
+      let couponCode = tempOrder.couponCode || '';
+      let discount = tempOrder.discountAmount || 0;
+      
+      // 如果 tempOrder 中有優惠券資訊，使用它；否則重新計算
+      if (!couponCode || discount === 0) {
+        // 重新驗證優惠券（以防購物車內容變化）
+        if (couponCode) {
+          const coupons = JSON.parse(localStorage.getItem('coupons') || '[]');
+          const coupon = coupons.find(c => c.code === couponCode && c.active !== false);
+          if (coupon && subtotal >= (coupon.minAmount || 0)) {
+            if (coupon.type === 'percent') {
+              discount = Math.round(subtotal * (1 - coupon.discount));
+            } else if (coupon.type === 'fixed') {
+              discount = coupon.discount;
+            }
+            if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+              discount = coupon.maxDiscount;
+            }
+          } else {
+            // 優惠券無效，重置
+            couponCode = '';
+            discount = 0;
           }
         }
       }

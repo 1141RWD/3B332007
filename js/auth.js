@@ -87,8 +87,12 @@ function hideNavItemsForRole(role) {
     const linkText = link.textContent.trim();
     
     if (role === 'admin') {
-      // 管理員：隱藏購物車、會員中心、聯絡我們
-      if (linkText.includes('購物車') || 
+      // 管理員：隱藏線上點餐、購物車、會員中心、聯絡我們
+      const href = link.querySelector('a')?.getAttribute('href');
+      if (href === 'menu.html' || 
+          href === 'cart.html' ||
+          linkText.includes('線上點餐') ||
+          linkText.includes('購物車') || 
           linkText.includes('會員中心') || 
           linkText.includes('聯絡我們')) {
         link.style.display = 'none';
